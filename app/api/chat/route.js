@@ -1,4 +1,4 @@
-import { openai } from "../../../lib/openai";
+import OpenAI from "openai";
 
 export const runtime = "nodejs";
 
@@ -6,8 +6,12 @@ export async function POST(req) {
   try {
     const { message } = await req.json();
 
-    const response = await openai.responses.create({
-      model: "gpt-4.1-mini",
+    const client = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY
+    });
+
+    const response = await client.responses.create({
+      model: "gpt-4o-mini",
       input: message
     });
 
