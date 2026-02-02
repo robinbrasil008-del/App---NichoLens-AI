@@ -1,4 +1,6 @@
-import { openai } from "@/lib/openai";
+import { openai } from "../../../lib/openai";
+
+export const runtime = "nodejs";
 
 export async function POST(req) {
   try {
@@ -17,7 +19,6 @@ ${url}
 5. Gere sugestões práticas de melhoria
 6. Sugira uma BIO otimizada
 7. Sugira estratégia de conteúdo
-8. Use linguagem clara e direta
 `;
 
     const response = await openai.chat.completions.create({
@@ -31,6 +32,7 @@ ${url}
     });
 
   } catch (error) {
+    console.error(error);
     return Response.json({ error: "Erro ao analisar perfil" }, { status: 500 });
   }
 }
