@@ -10,16 +10,31 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
 
   async function analyze() {
+    if (!url) return;
+
     setLoading(true);
     setResult("");
 
-    const res = await fetch("/api/analyze", {
-      method: "POST",
-      body: JSON.stringify({ url })
-    });
+    try {
+      const res = await fetch("/api/analyze", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ url })
+      });
 
-    const data = await res.json();
-    setResult(data.result || "Erro ao analisar.");
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Erro desconhecido");
+      }
+
+      setResult(data.result);
+    } catch (err) {
+      setResult("❌ Erro ao analisar o perfil. Verifique a URL.");
+    }
+
     setLoading(false);
   }
 
@@ -29,7 +44,7 @@ export default function Home() {
 
       <input
         className="border p-3 w-full"
-        placeholder="Cole a URL do perfil (TikTok, Instagram, YouTube...)"
+        placeholder="Cole a URL do perfil (Instagram, TikTok, YouTube...)"
         value={url}
         onChange={e => setUrl(e.target.value)}
       />
