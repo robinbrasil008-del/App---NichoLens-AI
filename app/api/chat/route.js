@@ -6,23 +6,23 @@ export async function POST(req) {
   try {
     const { message } = await req.json();
 
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [
-        {
-          role: "system",
-          content: "Você é um consultor especialista em redes sociais e nichos informais."
-        },
-        { role: "user", content: message }
-      ]
+    const response = await openai.responses.create({
+      model: "gpt-4.1-mini",
+      input: message
     });
 
-    return Response.json({
-      reply: response.choices[0].message.content
-    });
+    const text =
+      response.output_text ||
+      response.output?.[0]?.content?.[0]?.text;
+
+    return Response.json({ reply: text });
 
   } catch (error) {
-    console.error(error);
-    return Response.json({ error: "Erro no chat" }, { status: 500 });
+    console.error("ERRO CHAT:", error);
+
+    return Response.json(
+      { error: "Erro no chat", details: error.message },
+      { status: 500 }
+    );
   }
 }
