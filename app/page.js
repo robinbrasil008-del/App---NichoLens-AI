@@ -1,19 +1,26 @@
 "use client";
+
 import { useState } from "react";
-import ChatBox from "@/components/ChatBox";
-import CopyButton from "@/components/CopyButton";
+import ChatBox from "../components/ChatBox";
+import CopyButton from "../components/CopyButton";
 
 export default function Home() {
   const [url, setUrl] = useState("");
   const [result, setResult] = useState("");
+  const [loading, setLoading] = useState(false);
 
   async function analyze() {
+    setLoading(true);
+    setResult("");
+
     const res = await fetch("/api/analyze", {
       method: "POST",
       body: JSON.stringify({ url })
     });
+
     const data = await res.json();
-    setResult(data.result);
+    setResult(data.result || "Erro ao analisar.");
+    setLoading(false);
   }
 
   return (
@@ -22,13 +29,16 @@ export default function Home() {
 
       <input
         className="border p-3 w-full"
-        placeholder="Cole a URL do perfil"
+        placeholder="Cole a URL do perfil (TikTok, Instagram, YouTube...)"
         value={url}
         onChange={e => setUrl(e.target.value)}
       />
 
-      <button onClick={analyze} className="mt-3 bg-black text-white px-6 py-3 rounded">
-        Analisar Perfil
+      <button
+        onClick={analyze}
+        className="mt-3 bg-black text-white px-6 py-3 rounded"
+      >
+        {loading ? "Analisando..." : "Analisar Perfil"}
       </button>
 
       {result && (
