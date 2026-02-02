@@ -6,6 +6,13 @@ export async function POST(req) {
   try {
     const { url } = await req.json();
 
+    if (!url) {
+      return Response.json(
+        { error: "URL não informada" },
+        { status: 400 }
+      );
+    }
+
     const prompt = `
 Você é um especialista em redes sociais.
 
@@ -32,7 +39,11 @@ ${url}
     });
 
   } catch (error) {
-    console.error(error);
-    return Response.json({ error: "Erro ao analisar perfil" }, { status: 500 });
+    console.error("ERRO API ANALYZE:", error);
+
+    return Response.json(
+      { error: "Erro interno ao analisar perfil" },
+      { status: 500 }
+    );
   }
 }
