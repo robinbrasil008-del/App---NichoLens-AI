@@ -4,8 +4,7 @@ export const runtime = "nodejs";
 
 export async function POST(req) {
   try {
-    const body = await req.json();
-    const url = body?.url;
+    const { url } = await req.json();
 
     if (!url) {
       return Response.json(
@@ -23,7 +22,7 @@ ${url}
 Responda em português.
 
 1. Identifique automaticamente o NICHO do perfil
-2. Diga se o perfil está adequado para um nicho INFORMAL
+2. Diga se o perfil é adequado para um nicho informal
 3. Liste pontos fortes
 4. Liste pontos fracos
 5. Sugira melhorias práticas
@@ -31,15 +30,14 @@ Responda em português.
 7. Sugira uma estratégia de conteúdo
 `;
 
-    const completion = await openai.chat.completions.create({
+    const response = await openai.responses.create({
       model: "gpt-4.1-mini",
-      messages: [
-        { role: "user", content: prompt }
-      ],
-      temperature: 0.7
+      input: prompt
     });
 
-    const text = completion.choices?.[0]?.message?.content;
+    const text =
+      response.output_text ||
+      response.output?.[0]?.content?.[0]?.text;
 
     if (!text) {
       throw new Error("Resposta vazia da OpenAI");
@@ -48,11 +46,11 @@ Responda em português.
     return Response.json({ result: text });
 
   } catch (error) {
-    console.error("ERRO API ANALYZE:", error);
+    console.error("ERRO OPENAI:", error);
 
     return Response.json(
       {
-        error: "Falha ao gerar análise",
+        error: "Erro ao gerar análise",
         details: error.message
       },
       { status: 500 }
