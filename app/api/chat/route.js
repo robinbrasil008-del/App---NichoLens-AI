@@ -1,17 +1,28 @@
-import { openai } from "@/lib/openai";
+import { openai } from "../../../lib/openai";
+
+export const runtime = "nodejs";
 
 export async function POST(req) {
-  const { message } = await req.json();
+  try {
+    const { message } = await req.json();
 
-  const response = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
-    messages: [
-      { role: "system", content: "Você é um consultor de redes sociais especialista em nicho informal." },
-      { role: "user", content: message }
-    ]
-  });
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "system",
+          content: "Você é um consultor especialista em redes sociais e nichos informais."
+        },
+        { role: "user", content: message }
+      ]
+    });
 
-  return Response.json({
-    reply: response.choices[0].message.content
-  });
+    return Response.json({
+      reply: response.choices[0].message.content
+    });
+
+  } catch (error) {
+    console.error(error);
+    return Response.json({ error: "Erro no chat" }, { status: 500 });
+  }
 }
