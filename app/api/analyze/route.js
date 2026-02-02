@@ -1,4 +1,4 @@
-import { openai } from "../../../lib/openai";
+import OpenAI from "openai";
 
 export const runtime = "nodejs";
 
@@ -13,6 +13,10 @@ export async function POST(req) {
       );
     }
 
+    const client = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY
+    });
+
     const prompt = `
 Você é um especialista em redes sociais.
 
@@ -22,7 +26,7 @@ ${url}
 Responda em português.
 
 1. Identifique automaticamente o NICHO do perfil
-2. Diga se o perfil é adequado para um nicho informal
+2. Avalie se o perfil é adequado para um nicho informal
 3. Liste pontos fortes
 4. Liste pontos fracos
 5. Sugira melhorias práticas
@@ -30,18 +34,14 @@ Responda em português.
 7. Sugira uma estratégia de conteúdo
 `;
 
-    const response = await openai.responses.create({
-      model: "gpt-4.1-mini",
+    const response = await client.responses.create({
+      model: "gpt-4o-mini",
       input: prompt
     });
 
     const text =
       response.output_text ||
       response.output?.[0]?.content?.[0]?.text;
-
-    if (!text) {
-      throw new Error("Resposta vazia da OpenAI");
-    }
 
     return Response.json({ result: text });
 
