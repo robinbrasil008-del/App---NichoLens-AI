@@ -1,5 +1,7 @@
 "use client";
+
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 export default function Page() {
   const [url, setUrl] = useState("");
@@ -7,9 +9,9 @@ export default function Page() {
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState("");
 
-  // ✅ Fonte bonita sem mexer no layout.js
+  // Fonte bonita (não mexe no layout.js)
   useEffect(() => {
-    const id = "nicholens-font";
+    const id = "font-plus-jakarta";
     if (!document.getElementById(id)) {
       const link = document.createElement("link");
       link.id = id;
@@ -36,7 +38,7 @@ export default function Page() {
     setLoading(false);
   }
 
-  function copyText(label, text) {
+  function copy(label, text) {
     navigator.clipboard.writeText(text);
     setCopied(label);
     setTimeout(() => setCopied(""), 1200);
@@ -45,17 +47,16 @@ export default function Page() {
   return (
     <main style={styles.bg}>
       <div style={styles.shell}>
+        {/* HEADER */}
         <header style={styles.header}>
-          <div style={styles.brandRow}>
-            <span style={styles.icon}>🔍</span>
-            <h1 style={styles.brand}>NichoLens AI</h1>
-          </div>
+          <h1 style={styles.title}>🔍 NichoLens AI</h1>
           <p style={styles.subtitle}>
-            Diagnóstico estratégico para crescer nas redes sociais
+            Análise inteligente de perfis para crescer nas redes sociais
           </p>
         </header>
 
-        <section style={styles.topCard}>
+        {/* CARD INPUT */}
+        <section style={styles.card}>
           <label style={styles.label}>URL do perfil</label>
           <input
             style={styles.input}
@@ -64,67 +65,71 @@ export default function Page() {
             onChange={(e) => setUrl(e.target.value)}
           />
 
-          <button style={styles.button} onClick={analisar} disabled={loading}>
+          <button style={styles.mainButton} onClick={analisar}>
             {loading ? "Analisando..." : "🚀 Analisar Perfil"}
           </button>
 
-          <div style={styles.hintRow}>
-            <span style={styles.hintPill}>✅ Nicho automático</span>
-            <span style={styles.hintPill}>✅ Sugestões por seção</span>
-            <span style={styles.hintPill}>✅ Copiar rápido</span>
-          </div>
+          {/* BOTÃO PARA A SEGUNDA PÁGINA */}
+          <Link href="/chat" style={{ textDecoration: "none" }}>
+            <button style={styles.chatButton}>
+              💬 Ir para o Chat com IA
+            </button>
+          </Link>
         </section>
 
+        {/* RESULTADOS */}
         {analysis && (
           <section style={styles.results}>
             <Block
               title="🎯 Nicho Identificado"
               text={get(analysis, 1)}
-              onCopy={() => copyText("Nicho", get(analysis, 1))}
-              copied={copied === "Nicho"}
+              copied={copied === "nicho"}
+              onCopy={() => copy("nicho", get(analysis, 1))}
             />
             <Block
               title="👥 Público-Alvo"
               text={get(analysis, 2)}
-              onCopy={() => copyText("Publico", get(analysis, 2))}
-              copied={copied === "Publico"}
+              copied={copied === "publico"}
+              onCopy={() => copy("publico", get(analysis, 2))}
             />
             <Block
               title="✅ Pontos Fortes"
               text={get(analysis, 3)}
-              onCopy={() => copyText("Fortes", get(analysis, 3))}
-              copied={copied === "Fortes"}
+              copied={copied === "fortes"}
+              onCopy={() => copy("fortes", get(analysis, 3))}
             />
             <Block
               title="⚠️ Pontos Fracos"
               text={get(analysis, 4)}
-              onCopy={() => copyText("Fracos", get(analysis, 4))}
-              copied={copied === "Fracos"}
+              copied={copied === "fracos"}
+              onCopy={() => copy("fracos", get(analysis, 4))}
             />
             <Block
               title="🚀 Sugestões Práticas"
               text={get(analysis, 5)}
-              onCopy={() => copyText("Sugestoes", get(analysis, 5))}
-              copied={copied === "Sugestoes"}
+              copied={copied === "sugestoes"}
+              onCopy={() => copy("sugestoes", get(analysis, 5))}
             />
             <Block
               title="🧬 Bio Otimizada"
               text={get(analysis, 6)}
-              onCopy={() => copyText("Bio", get(analysis, 6))}
-              copied={copied === "Bio"}
+              copied={copied === "bio"}
+              onCopy={() => copy("bio", get(analysis, 6))}
             />
             <Block
               title="💡 Ideias de Conteúdo"
               text={get(analysis, 7)}
-              onCopy={() => copyText("Ideias", get(analysis, 7))}
-              copied={copied === "Ideias"}
+              copied={copied === "ideias"}
+              onCopy={() => copy("ideias", get(analysis, 7))}
             />
 
             <button
               style={styles.copyAll}
-              onClick={() => copyText("Completa", analysis)}
+              onClick={() => copy("all", analysis)}
             >
-              {copied === "Completa" ? "✅ Copiado!" : "📋 Copiar Análise Completa"}
+              {copied === "all"
+                ? "✅ Análise Copiada"
+                : "📋 Copiar Análise Completa"}
             </button>
           </section>
         )}
@@ -133,6 +138,7 @@ export default function Page() {
   );
 }
 
+/* COMPONENTE DE BLOCO */
 function Block({ title, text, onCopy, copied }) {
   if (!text) return null;
 
@@ -140,44 +146,16 @@ function Block({ title, text, onCopy, copied }) {
     <div style={styles.block}>
       <div style={styles.blockHeader}>
         <h3 style={styles.blockTitle}>{title}</h3>
-
         <button style={styles.copyBtn} onClick={onCopy}>
           {copied ? "✅ Copiado" : "Copiar"}
         </button>
       </div>
-
-      <div style={styles.blockBody}>{formatText(text)}</div>
+      <p style={styles.blockText}>{text}</p>
     </div>
   );
 }
 
-// Tenta melhorar leitura em bullets (sem precisar mudar a API)
-function formatText(text) {
-  const lines = text
-    .replace(/\*\*/g, "")
-    .split("\n")
-    .map((l) => l.trim())
-    .filter(Boolean);
-
-  // Se tiver várias linhas começando com "-" vira lista
-  const dashCount = lines.filter((l) => l.startsWith("-")).length;
-
-  if (dashCount >= 2) {
-    return (
-      <ul style={styles.ul}>
-        {lines.map((l, i) => (
-          <li key={i} style={styles.li}>
-            {l.replace(/^-+\s*/, "")}
-          </li>
-        ))}
-      </ul>
-    );
-  }
-
-  return <p style={styles.p}>{text.replace(/\*\*/g, "").trim()}</p>;
-}
-
-// Extrai seção 1..7 do texto vindo do modelo
+/* EXTRAI SEÇÕES 1..7 */
 function get(text, n) {
   const parts = text.split("###");
   const section = parts.find((p) => p.trim().startsWith(n + "."));
@@ -186,74 +164,60 @@ function get(text, n) {
     : "";
 }
 
+/* ESTILOS */
 const styles = {
   bg: {
     minHeight: "100vh",
     background:
       "radial-gradient(1200px 600px at 20% 0%, #e9edff 0%, #f7f8ff 40%, #eef2ff 100%)",
-    padding: 18,
+    padding: 20,
     fontFamily:
-      '"Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial',
+      '"Plus Jakarta Sans", system-ui, -apple-system, Segoe UI, Roboto',
     color: "#0f172a",
   },
   shell: {
-    maxWidth: 920,
+    maxWidth: 960,
     margin: "0 auto",
   },
   header: {
     textAlign: "center",
-    marginTop: 10,
-    marginBottom: 14,
+    marginBottom: 16,
   },
-  brandRow: {
-    display: "flex",
-    gap: 10,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  icon: { fontSize: 28 },
-  brand: {
+  title: {
     margin: 0,
     fontSize: 34,
     fontWeight: 800,
-    letterSpacing: -0.6,
-    color: "#0b1220",
   },
   subtitle: {
-    margin: "6px 0 0",
+    marginTop: 6,
     color: "#475569",
     fontSize: 14,
   },
-  topCard: {
-    background: "rgba(255,255,255,0.9)",
-    border: "1px solid rgba(15,23,42,0.08)",
+  card: {
+    background: "#ffffff",
     borderRadius: 18,
     padding: 16,
     boxShadow: "0 18px 40px rgba(15,23,42,0.12)",
+    marginBottom: 16,
   },
   label: {
-    display: "block",
     fontSize: 12,
-    color: "#64748b",
-    marginBottom: 8,
     fontWeight: 700,
+    color: "#64748b",
     textTransform: "uppercase",
-    letterSpacing: 0.8,
   },
   input: {
     width: "100%",
-    padding: "14px 14px",
+    padding: 14,
     borderRadius: 14,
     border: "1px solid rgba(2,6,23,0.12)",
-    outline: "none",
+    marginTop: 8,
+    marginBottom: 12,
     fontSize: 15,
-    background: "#ffffff",
-    color: "#0f172a",
   },
-  button: {
+  mainButton: {
     width: "100%",
-    marginTop: 12,
-    padding: "14px 16px",
+    padding: 14,
     borderRadius: 14,
     border: "none",
     background: "linear-gradient(90deg,#4f46e5,#7c3aed)",
@@ -261,32 +225,26 @@ const styles = {
     fontWeight: 800,
     fontSize: 15,
     cursor: "pointer",
-    boxShadow: "0 14px 26px rgba(79,70,229,0.25)",
+    marginBottom: 10,
   },
-  hintRow: {
-    display: "flex",
-    flexWrap: "wrap",
-    gap: 8,
-    marginTop: 12,
-  },
-  hintPill: {
-    fontSize: 12,
-    color: "#334155",
-    background: "#eef2ff",
-    border: "1px solid rgba(79,70,229,0.18)",
-    padding: "6px 10px",
-    borderRadius: 999,
-    fontWeight: 700,
+  chatButton: {
+    width: "100%",
+    padding: 14,
+    borderRadius: 14,
+    border: "none",
+    background: "#0f172a",
+    color: "#fff",
+    fontWeight: 800,
+    fontSize: 15,
+    cursor: "pointer",
   },
   results: {
-    marginTop: 16,
     display: "flex",
     flexDirection: "column",
     gap: 12,
   },
   block: {
-    background: "rgba(255,255,255,0.92)",
-    border: "1px solid rgba(15,23,42,0.08)",
+    background: "#ffffff",
     borderRadius: 18,
     padding: 14,
     boxShadow: "0 10px 22px rgba(15,23,42,0.08)",
@@ -295,51 +253,35 @@ const styles = {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    gap: 10,
-    marginBottom: 10,
+    marginBottom: 8,
   },
   blockTitle: {
     margin: 0,
     fontSize: 16,
     fontWeight: 800,
-    color: "#0b1220",
   },
   copyBtn: {
-    border: "1px solid rgba(2,6,23,0.10)",
+    border: "1px solid rgba(2,6,23,0.12)",
     background: "#ffffff",
-    padding: "8px 12px",
+    padding: "6px 12px",
     borderRadius: 999,
     cursor: "pointer",
-    fontWeight: 800,
+    fontWeight: 700,
     fontSize: 12,
-    color: "#0f172a",
   },
-  blockBody: {
-    color: "#0f172a",
+  blockText: {
     fontSize: 14,
-    lineHeight: 1.65,
-  },
-  ul: {
-    margin: 0,
-    paddingLeft: 18,
-  },
-  li: {
-    marginBottom: 6,
-    color: "#0f172a",
-  },
-  p: {
-    margin: 0,
+    lineHeight: 1.6,
     whiteSpace: "pre-line",
   },
   copyAll: {
     marginTop: 6,
-    padding: "14px 16px",
+    padding: 14,
     borderRadius: 14,
     border: "none",
     background: "#0f172a",
     color: "#fff",
     fontWeight: 900,
     cursor: "pointer",
-    boxShadow: "0 14px 26px rgba(2,6,23,0.18)",
   },
 };
