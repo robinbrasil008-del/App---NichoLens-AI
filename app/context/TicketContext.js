@@ -12,12 +12,12 @@ export function TicketProvider({ children }) {
 
   useEffect(() => {
     const stored = localStorage.getItem("nicholens-tickets");
-
     if (stored === null) {
-      localStorage.setItem("nicholens-tickets", FREE_TICKETS);
+      localStorage.setItem("nicholens-tickets", String(FREE_TICKETS));
       setTickets(FREE_TICKETS);
     } else {
-      setTickets(Number(stored));
+      const n = Number(stored);
+      setTickets(Number.isFinite(n) ? n : FREE_TICKETS);
     }
   }, []);
 
@@ -25,25 +25,23 @@ export function TicketProvider({ children }) {
     if (tickets <= 0) return false;
     const next = tickets - 1;
     setTickets(next);
-    localStorage.setItem("nicholens-tickets", next);
+    localStorage.setItem("nicholens-tickets", String(next));
     return true;
   }
 
-  // 🔮 FUTURO LOGIN
+  // 🔮 FUTURO: chamar isso depois que o usuário logar
   function applyLoginBonus() {
     const used = localStorage.getItem("nicholens-login-bonus");
     if (used) return;
 
     const next = tickets + LOGIN_BONUS;
     setTickets(next);
-    localStorage.setItem("nicholens-tickets", next);
+    localStorage.setItem("nicholens-tickets", String(next));
     localStorage.setItem("nicholens-login-bonus", "1");
   }
 
   return (
-    <TicketContext.Provider
-      value={{ tickets, consumeTicket, applyLoginBonus }}
-    >
+    <TicketContext.Provider value={{ tickets, consumeTicket, applyLoginBonus }}>
       {children}
     </TicketContext.Provider>
   );
@@ -51,8 +49,6 @@ export function TicketProvider({ children }) {
 
 export function useTickets() {
   const ctx = useContext(TicketContext);
-  if (!ctx) {
-    throw new Error("useTickets must be used inside TicketProvider");
-  }
+  if (!ctx) throw new Error("useTickets must be used inside TicketProvider");
   return ctx;
 }
