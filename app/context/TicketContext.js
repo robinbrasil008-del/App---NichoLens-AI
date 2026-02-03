@@ -2,36 +2,46 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 
-const TicketContext = createContext(undefined);
+const TicketContext = createContext(null);
+
+const FREE_TICKETS = 7;
+const LOGIN_BONUS = 2; // preparado para login futuro
 
 export function TicketProvider({ children }) {
-  const [tickets, setTickets] = useState(7);
+  const [tickets, setTickets] = useState(FREE_TICKETS);
+  const [logged, setLogged] = useState(false); // futuro login
 
   useEffect(() => {
     const saved = localStorage.getItem("nicholens-tickets");
     if (saved !== null) {
-      const n = Number(saved);
-      if (!Number.isNaN(n)) setTickets(n);
+      setTickets(Number(saved));
+    } else {
+      setTickets(FREE_TICKETS);
+      localStorage.setItem("nicholens-tickets", FREE_TICKETS);
     }
   }, []);
 
-  useEffect(() => {
-    localStorage.setItem("nicholens-tickets", String(tickets));
-  }, [tickets]);
-
-  function useTicket() {
+  function consumeTicket() {
     if (tickets <= 0) return false;
-    setTickets(t => t - 1);
+
+    const next = tickets - 1;
+    setTickets(next);
+    localStorage.setItem("nicholens-tickets", next);
     return true;
   }
 
-  const value = {
-    tickets,
-    useTicket,
-  };
+  function addLoginBonus() {
+    if (logged) return;
+    const next = tickets + LOGIN_BONUS;
+    setLogged(true);
+    setTickets(next);
+    localStorage.setItem("nicholens-tickets", next);
+  }
 
   return (
-    <TicketContext.Provider value={value}>
+    <TicketContext.Provider
+      value={{ tickets, consumeTicket, addLoginBonus }}
+    >
       {children}
     </TicketContext.Provider>
   );
@@ -39,14 +49,8 @@ export function TicketProvider({ children }) {
 
 export function useTickets() {
   const ctx = useContext(TicketContext);
-
-  // 🔒 BLINDAGEM TOTAL (EVITA TELA BRANCA)
   if (!ctx) {
-    return {
-      tickets: 0,
-      useTicket: () => false,
-    };
+    throw new Error("useTickets deve estar dentro de TicketProvider");
   }
-
   return ctx;
 }
