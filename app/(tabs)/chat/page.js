@@ -16,23 +16,35 @@ export default function ChatPage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [projects, setProjects] = useState([]);
 
-  // 🔹 Carrega projetos salvos
+  // 🔹 Carregar projetos salvos
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem("nicholens-projects")) || [];
     setProjects(saved);
   }, []);
 
-  // 🔹 Salva automaticamente quando mensagens mudam
+  // 🔹 Gerar nome do projeto a partir da 1ª mensagem
+  function generateProjectTitle(msg) {
+    if (!msg) return "Novo projeto";
+    return msg.length > 40 ? msg.slice(0, 40) + "…" : msg;
+  }
+
+  // 🔹 Salvar projeto automaticamente
   useEffect(() => {
-    if (messages.length === 0) return;
+    if (messages.length < 2) return;
+
+    const firstUserMsg = messages.find(m => m.role === "user")?.content;
 
     const newProject = {
       id: Date.now(),
-      date: new Date().toLocaleString(),
+      title: generateProjectTitle(firstUserMsg),
       messages,
     };
 
-    const updated = [newProject, ...projects];
+    const updated = [
+      newProject,
+      ...projects.filter(p => p.id !== newProject.id),
+    ];
+
     setProjects(updated);
     localStorage.setItem("nicholens-projects", JSON.stringify(updated));
     // eslint-disable-next-line
@@ -42,7 +54,7 @@ export default function ChatPage() {
     const msg = text ?? input;
     if (!msg.trim()) return;
 
-    setMessages((prev) => [...prev, { role: "user", content: msg }]);
+    setMessages(prev => [...prev, { role: "user", content: msg }]);
     setInput("");
     setLoading(true);
 
@@ -55,12 +67,12 @@ export default function ChatPage() {
 
       const data = await res.json();
 
-      setMessages((prev) => [
+      setMessages(prev => [
         ...prev,
         { role: "assistant", content: data.reply },
       ]);
     } catch {
-      setMessages((prev) => [
+      setMessages(prev => [
         ...prev,
         { role: "assistant", content: "Erro ao responder." },
       ]);
@@ -102,23 +114,37 @@ export default function ChatPage() {
             <div style={styles.menuEmpty}>Nenhum projeto ainda</div>
           )}
 
-          {projects.map((p) => (
+          {projects.map(p => (
             <button
               key={p.id}
               style={styles.menuItem}
               onClick={() => loadProject(p)}
             >
-              {p.date}
+              📌 {p.title}
             </button>
           ))}
         </div>
       )}
 
+      {/* INPUT FIXO ABAIXO DO HEADER */}
+      <div style={styles.inputAreaTop}>
+        <input
+          value={input}
+          onChange={e => setInput(e.target.value)}
+          placeholder="Digite sua mensagem..."
+          style={styles.input}
+          onKeyDown={e => e.key === "Enter" && sendMessage()}
+        />
+        <button onClick={() => sendMessage()} style={styles.send}>
+          Enviar
+        </button>
+      </div>
+
       {/* INTRO */}
       {messages.length === 0 && (
         <div style={styles.intro}>
           <div style={styles.openai}>
-            🔒 O NichoLens usa <b>OpenAI – ChatGPT</b> nesta conversa
+            🔒 O NichoLens utiliza <b>OpenAI – ChatGPT</b> nesta conversa
           </div>
 
           <div style={styles.suggestions}>
@@ -154,29 +180,15 @@ export default function ChatPage() {
 
         {loading && (
           <div style={{ ...styles.bubble, background: "#2a2f45" }}>
-            Digitando...
+            Digitando…
           </div>
         )}
-      </div>
-
-      {/* INPUT */}
-      <div style={styles.inputArea}>
-        <input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Digite sua mensagem..."
-          style={styles.input}
-          onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-        />
-        <button onClick={() => sendMessage()} style={styles.send}>
-          Enviar
-        </button>
       </div>
     </div>
   );
 }
 
-/* ====== STYLES ====== */
+/* ===== STYLES ===== */
 
 const styles = {
   page: {
@@ -231,6 +243,30 @@ const styles = {
     opacity: 0.5,
     padding: 6,
   },
+  inputAreaTop: {
+    display: "flex",
+    gap: 10,
+    padding: 12,
+    background: "#0d1020",
+    borderBottom: "1px solid #1f2440",
+  },
+  input: {
+    flex: 1,
+    padding: 14,
+    borderRadius: 12,
+    border: "none",
+    background: "#1a1f36",
+    color: "#fff",
+  },
+  send: {
+    background: "#6d5dfc",
+    border: "none",
+    borderRadius: 12,
+    padding: "0 20px",
+    color: "#fff",
+    fontWeight: 600,
+    cursor: "pointer",
+  },
   intro: {
     padding: 20,
     textAlign: "center",
@@ -268,28 +304,5 @@ const styles = {
     borderRadius: 16,
     fontSize: 15,
     lineHeight: 1.6,
-  },
-  inputArea: {
-    display: "flex",
-    gap: 10,
-    padding: 12,
-    background: "#0d1020",
-  },
-  input: {
-    flex: 1,
-    padding: 14,
-    borderRadius: 12,
-    border: "none",
-    background: "#1a1f36",
-    color: "#fff",
-  },
-  send: {
-    background: "#6d5dfc",
-    border: "none",
-    borderRadius: 12,
-    padding: "0 20px",
-    color: "#fff",
-    fontWeight: 600,
-    cursor: "pointer",
   },
 };
