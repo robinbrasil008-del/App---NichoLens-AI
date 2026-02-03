@@ -1,15 +1,14 @@
 "use client";
-
 import { useState } from "react";
 
 export default function Page() {
   const [url, setUrl] = useState("");
-  const [result, setResult] = useState("");
+  const [analysis, setAnalysis] = useState("");
   const [loading, setLoading] = useState(false);
 
   async function analisar() {
     setLoading(true);
-    setResult("");
+    setAnalysis("");
 
     const res = await fetch("/api/analyze", {
       method: "POST",
@@ -18,133 +17,147 @@ export default function Page() {
     });
 
     const data = await res.json();
-    setResult(data.result || data.error || "Erro ao analisar");
+    setAnalysis(data.result || data.error || "Erro ao analisar");
     setLoading(false);
   }
 
   return (
-    <main style={styles.page}>
-      <div style={styles.container}>
-        <h1 style={styles.logo}>🔍 NichoLens AI</h1>
-        <p style={styles.tagline}>
-          Descubra o nicho, pontos fracos e como crescer seu perfil nas redes
+    <main style={styles.bg}>
+      <div style={styles.card}>
+        <h1 style={styles.title}>🔍 NichoLens AI</h1>
+        <p style={styles.subtitle}>
+          Análise estratégica de perfis para crescer nas redes sociais
         </p>
 
-        <div style={styles.inputBox}>
-          <input
-            style={styles.input}
-            placeholder="Cole a URL do Instagram, TikTok ou YouTube"
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-          />
+        <input
+          style={styles.input}
+          placeholder="Cole a URL do perfil (Instagram, TikTok, YouTube)"
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
+        />
 
-          <button
-            style={{
-              ...styles.button,
-              opacity: loading ? 0.7 : 1,
-            }}
-            onClick={analisar}
-            disabled={loading}
-          >
-            {loading ? "🔎 Analisando..." : "🚀 Analisar Perfil"}
-          </button>
-        </div>
+        <button style={styles.button} onClick={analisar} disabled={loading}>
+          {loading ? "Analisando..." : "Analisar Perfil"}
+        </button>
 
-        {result && (
-          <section style={styles.resultCard}>
-            <h2 style={styles.resultTitle}>📊 Diagnóstico do Perfil</h2>
-            <div style={styles.resultText}>{result}</div>
+        {analysis && (
+          <div style={styles.analysisBox}>
+            <Section title="🎯 Nicho Identificado" text={extract(analysis, 1)} />
+            <Section title="👥 Público-Alvo" text={extract(analysis, 2)} />
+            <Section title="✅ Pontos Fortes" text={extract(analysis, 3)} />
+            <Section title="⚠️ Pontos Fracos" text={extract(analysis, 4)} />
+            <Section title="🚀 Sugestões Práticas" text={extract(analysis, 5)} />
+            <Section title="🧬 Bio Otimizada" text={extract(analysis, 6)} />
+            <Section title="💡 Ideias de Conteúdo" text={extract(analysis, 7)} />
 
             <button
-              style={styles.copyButton}
-              onClick={() => navigator.clipboard.writeText(result)}
+              style={styles.copy}
+              onClick={() => navigator.clipboard.writeText(analysis)}
             >
-              📋 Copiar Análise
+              📋 Copiar Análise Completa
             </button>
-          </section>
+          </div>
         )}
       </div>
     </main>
   );
 }
 
+function Section({ title, text }) {
+  if (!text) return null;
+  return (
+    <div style={styles.section}>
+      <h3 style={styles.sectionTitle}>{title}</h3>
+      <p style={styles.sectionText}>{text}</p>
+    </div>
+  );
+}
+
+// Extrai blocos pelo número da seção (1 a 7)
+function extract(text, n) {
+  const parts = text.split("###");
+  const section = parts.find((p) => p.trim().startsWith(n + "."));
+  return section
+    ? section.replace(/\*\*/g, "").replace(/\n+/g, "\n").trim()
+    : "";
+}
+
 const styles = {
-  page: {
+  bg: {
     minHeight: "100vh",
-    background: "linear-gradient(135deg, #0f0f0f, #1c1c1c)",
+    background: "#0f172a",
     display: "flex",
     justifyContent: "center",
-    padding: "40px 16px",
+    padding: 20,
   },
-  container: {
-    width: "100%",
+  card: {
+    background: "#fff",
     maxWidth: 820,
-    background: "#ffffff",
+    width: "100%",
     borderRadius: 20,
-    padding: 32,
-    boxShadow: "0 30px 60px rgba(0,0,0,0.25)",
+    padding: 30,
+    boxShadow: "0 25px 60px rgba(0,0,0,0.4)",
   },
-  logo: {
-    margin: 0,
+  title: {
     textAlign: "center",
-    fontSize: 34,
-    fontWeight: 800,
+    marginBottom: 6,
   },
-  tagline: {
+  subtitle: {
     textAlign: "center",
     color: "#555",
-    marginBottom: 30,
-    fontSize: 16,
-  },
-  inputBox: {
-    display: "flex",
-    flexDirection: "column",
-    gap: 12,
-    marginBottom: 30,
+    marginBottom: 24,
   },
   input: {
     width: "100%",
-    padding: "14px 16px",
+    padding: 14,
     fontSize: 16,
     borderRadius: 10,
-    border: "1px solid #ddd",
-    outline: "none",
+    border: "1px solid #ccc",
+    marginBottom: 12,
   },
   button: {
-    padding: "14px",
-    fontSize: 16,
+    width: "100%",
+    padding: 14,
+    background: "#111827",
+    color: "#fff",
+    fontWeight: 600,
     borderRadius: 10,
     border: "none",
-    background: "#000",
-    color: "#fff",
     cursor: "pointer",
-    fontWeight: 600,
+    marginBottom: 20,
   },
-  resultCard: {
-    background: "#f8f9fc",
+  analysisBox: {
+    background: "#f8fafc",
     borderRadius: 16,
-    padding: 24,
+    padding: 20,
+  },
+  section: {
+    background: "#fff",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 14,
     border: "1px solid #e5e7eb",
   },
-  resultTitle: {
-    marginTop: 0,
-    marginBottom: 16,
-    fontSize: 22,
+  sectionTitle: {
+    margin: 0,
+    marginBottom: 8,
+    fontSize: 16,
   },
-  resultText: {
-    whiteSpace: "pre-wrap",
-    fontSize: 15,
+  sectionText: {
+    margin: 0,
+    fontSize: 14,
     lineHeight: 1.6,
-    color: "#222",
+    whiteSpace: "pre-line",
   },
-  copyButton: {
+  copy: {
     marginTop: 20,
-    padding: "12px 16px",
-    borderRadius: 10,
-    border: "none",
+    width: "100%",
+    padding: 12,
     background: "#4f46e5",
     color: "#fff",
-    cursor: "pointer",
+    borderRadius: 10,
+    border: "none",
     fontWeight: 600,
+    cursor: "pointer",
   },
 };
