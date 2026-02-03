@@ -1,12 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTickets } from "./context/TicketContext";
 
 export default function Page() {
   const [url, setUrl] = useState("");
   const [analysis, setAnalysis] = useState("");
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState("");
+
+  const { tickets, consumeTicket } = useTickets();
 
   useEffect(() => {
     const id = "font-plus-jakarta";
@@ -21,19 +24,29 @@ export default function Page() {
   }, []);
 
   async function analisar() {
-    if (!url) return;
+    if (!url || loading) return;
+
+    // 🎟️ CHECK GLOBAL TICKET
+    if (!consumeTicket()) {
+      alert("❌ Seus tickets acabaram! Faça login ou assine o plano PRO.");
+      return;
+    }
+
     setLoading(true);
     setAnalysis("");
 
-    const res = await fetch("/api/analyze", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ url }),
-    });
+    try {
+      const res = await fetch("/api/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url }),
+      });
 
-    const data = await res.json();
-    setAnalysis(data.result || "");
-    setLoading(false);
+      const data = await res.json();
+      setAnalysis(data.result || "");
+    } finally {
+      setLoading(false);
+    }
   }
 
   function copy(label, text) {
@@ -50,6 +63,9 @@ export default function Page() {
           <p style={styles.subtitle}>
             Cole a URL do perfil e receba um diagnóstico + sugestões práticas
           </p>
+
+          {/* 🎟️ TICKETS GLOBAL */}
+          <div style={styles.tickets}>🎟️ {tickets}</div>
         </header>
 
         <section style={styles.card}>
@@ -59,10 +75,23 @@ export default function Page() {
             placeholder="Instagram, TikTok, YouTube..."
             value={url}
             onChange={(e) => setUrl(e.target.value)}
+            disabled={tickets <= 0}
           />
 
-          <button style={styles.mainButton} onClick={analisar}>
-            {loading ? "Analisando..." : "🚀 Analisar Perfil"}
+          <button
+            style={{
+              ...styles.mainButton,
+              opacity: tickets <= 0 ? 0.6 : 1,
+              cursor: tickets <= 0 ? "not-allowed" : "pointer",
+            }}
+            onClick={analisar}
+            disabled={tickets <= 0}
+          >
+            {tickets <= 0
+              ? "❌ Tickets esgotados"
+              : loading
+              ? "Analisando..."
+              : "🚀 Analisar Perfil"}
           </button>
         </section>
 
@@ -111,7 +140,10 @@ export default function Page() {
               onCopy={() => copy("ideias", get(analysis, 7))}
             />
 
-            <button style={styles.copyAll} onClick={() => copy("all", analysis)}>
+            <button
+              style={styles.copyAll}
+              onClick={() => copy("all", analysis)}
+            >
               {copied === "all" ? "✅ Análise Copiada" : "📋 Copiar Tudo"}
             </button>
           </section>
@@ -145,6 +177,8 @@ function get(text, n) {
     : "";
 }
 
+/* ===== STYLES ===== */
+
 const styles = {
   bg: {
     minHeight: "100vh",
@@ -159,6 +193,12 @@ const styles = {
   header: { textAlign: "center", marginBottom: 14 },
   title: { margin: 0, fontSize: 34, fontWeight: 900 },
   subtitle: { marginTop: 6, color: "#475569", fontSize: 13 },
+  tickets: {
+    marginTop: 6,
+    fontSize: 13,
+    fontWeight: 800,
+    opacity: 0.85,
+  },
   card: {
     background: "#fff",
     borderRadius: 18,
@@ -190,7 +230,6 @@ const styles = {
     color: "#fff",
     fontWeight: 900,
     fontSize: 15,
-    cursor: "pointer",
   },
   results: { display: "flex", flexDirection: "column", gap: 12 },
   block: {
