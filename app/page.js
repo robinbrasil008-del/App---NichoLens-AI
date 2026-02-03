@@ -1,69 +1,57 @@
 "use client";
 
 import { useState } from "react";
-import ChatBox from "../components/ChatBox";
-import CopyButton from "../components/CopyButton";
 
 export default function Home() {
   const [url, setUrl] = useState("");
   const [result, setResult] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function analyze() {
-    if (!url) return;
-
+  async function analisar() {
     setLoading(true);
     setResult("");
 
     try {
       const res = await fetch("/api/analyze", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url })
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || "Erro desconhecido");
+        throw new Error(data.error || "Erro");
       }
 
       setResult(data.result);
-    } catch (err) {
-      setResult("❌ Erro ao analisar o perfil. Verifique a URL.");
+    } catch (e) {
+      setResult("❌ ERRO AO ANALISAR");
     }
 
     setLoading(false);
   }
 
   return (
-    <main className="p-6 max-w-3xl mx-auto">
-      <h1 className="text-3xl font-bold mb-4">NichoLens AI</h1>
+    <main style={{ padding: 20, maxWidth: 600 }}>
+      <h1>NichoLens AI (ZERO)</h1>
 
       <input
-        className="border p-3 w-full"
-        placeholder="Cole a URL do perfil (Instagram, TikTok, YouTube...)"
+        placeholder="Cole a URL do perfil"
         value={url}
         onChange={e => setUrl(e.target.value)}
+        style={{ width: "100%", padding: 10, marginBottom: 10 }}
       />
 
-      <button
-        onClick={analyze}
-        className="mt-3 bg-black text-white px-6 py-3 rounded"
-      >
-        {loading ? "Analisando..." : "Analisar Perfil"}
+      <button onClick={analisar} style={{ padding: 10 }}>
+        {loading ? "Analisando..." : "Analisar"}
       </button>
 
       {result && (
-        <div className="mt-6 bg-gray-100 p-4 rounded">
-          <pre className="whitespace-pre-wrap">{result}</pre>
-          <CopyButton text={result} />
-        </div>
+        <pre style={{ marginTop: 20, whiteSpace: "pre-wrap" }}>
+          {result}
+        </pre>
       )}
-
-      <ChatBox />
     </main>
   );
 }
