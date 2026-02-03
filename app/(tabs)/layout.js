@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { TicketProvider } from "./context/TicketContext";
 
 export default function Layout({ children }) {
   const pathname = usePathname();
@@ -22,37 +23,46 @@ export default function Layout({ children }) {
           flexDirection: "column",
         }}
       >
-        {/* Conteúdo */}
-        <main style={{ flex: 1, paddingBottom: 70 }}>
-          {children}
-        </main>
+        <TicketProvider>
+          <main style={{ flex: 1, paddingBottom: 70 }}>
+            {children}
+          </main>
 
-        {/* Barra inferior (abas) */}
-        <nav
-          style={{
-            position: "fixed",
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: 60,
-            background: "#0f1630",
-            borderTop: "1px solid #1f2a4a",
-            display: "flex",
-            justifyContent: "space-around",
-            alignItems: "center",
-          }}
-        >
-          <Link href="/" style={{ textDecoration: "none", color: isActive("/") }}>
-            🏠 <div style={{ fontSize: 12 }}>Início</div>
-          </Link>
-
-          <Link
-            href="/chat"
-            style={{ textDecoration: "none", color: isActive("/chat") }}
+          <nav
+            style={{
+              position: "fixed",
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: 60,
+              background: "#0f1630",
+              borderTop: "1px solid #1f2a4a",
+              display: "flex",
+              justifyContent: "space-around",
+              alignItems: "center",
+            }}
           >
-            💬 <div style={{ fontSize: 12 }}>Chat IA</div>
-          </Link>
-        </nav>
+            <Link
+              href="/"
+              style={{
+                textDecoration: "none",
+                color: isActive("/"),
+              }}
+            >
+              🏠 <div style={{ fontSize: 12 }}>Início</div>
+            </Link>
+
+            <Link
+              href="/chat"
+              style={{
+                textDecoration: "none",
+                color: isActive("/chat"),
+              }}
+            >
+              💬 <div style={{ fontSize: 12 }}>Chat IA</div>
+            </Link>
+          </nav>
+        </TicketProvider>
       </body>
     </html>
   );
