@@ -1,24 +1,23 @@
-import BottomTabs from "@/components/BottomTabs";
-
-export const metadata = {
-  title: "NichoLens AI",
-  description: "Análise estratégica de perfis + Chat IA",
-};
-
 export default function TabsLayout({ children }) {
   return (
-    <div style={styles.wrap}>
-      <div style={styles.content}>{children}</div>
-      <BottomTabs />
+    <div style={{ paddingBottom: 70 }}>
+      {children}
+
+      <nav style={{
+        position: "fixed",
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: 60,
+        background: "#fff",
+        borderTop: "1px solid #ddd",
+        display: "flex",
+        justifyContent: "space-around",
+        alignItems: "center"
+      }}>
+        <a href="/">🏠 Início</a>
+        <a href="/chat">💬 Chat</a>
+      </nav>
     </div>
   );
 }
-
-const styles = {
-  wrap: {
-    minHeight: "100vh",
-  },
-  content: {
-    paddingBottom: 92, // espaço para a barra de baixo
-  },
-};
