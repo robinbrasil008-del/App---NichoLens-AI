@@ -9,26 +9,18 @@ const LOGIN_BONUS = 2; // preparado para login futuro
 
 export function TicketProvider({ children }) {
   const [tickets, setTickets] = useState(FREE_TICKETS);
-  const [logged, setLogged] = useState(false);
 
-  // 🔹 Carregar tickets do localStorage
+  // 🔹 carregar do localStorage (fonte única)
   useEffect(() => {
-    if (typeof window === "undefined") return;
-
     const saved = localStorage.getItem("nicholens-tickets");
-
-    if (saved !== null && !isNaN(Number(saved))) {
+    if (saved !== null) {
       setTickets(Number(saved));
     } else {
-      setTickets(FREE_TICKETS);
-      localStorage.setItem(
-        "nicholens-tickets",
-        String(FREE_TICKETS)
-      );
+      localStorage.setItem("nicholens-tickets", String(FREE_TICKETS));
     }
   }, []);
 
-  // 🔹 Consumir ticket
+  // 🔹 consumir ticket (GLOBAL)
   function consumeTicket() {
     if (tickets <= 0) return false;
 
@@ -38,41 +30,26 @@ export function TicketProvider({ children }) {
     return true;
   }
 
-  // 🔹 Bônus futuro de login (+2)
+  // 🔹 bônus futuro (login)
   function addLoginBonus() {
-    if (logged) return;
-
     const next = tickets + LOGIN_BONUS;
-    setLogged(true);
     setTickets(next);
     localStorage.setItem("nicholens-tickets", String(next));
   }
 
   return (
     <TicketContext.Provider
-      value={{
-        tickets,
-        consumeTicket,
-        addLoginBonus,
-      }}
+      value={{ tickets, consumeTicket, addLoginBonus }}
     >
       {children}
     </TicketContext.Provider>
   );
 }
 
-// 🔹 Hook seguro (NUNCA quebra tela)
 export function useTickets() {
   const ctx = useContext(TicketContext);
-
-  // fallback seguro (evita tela branca)
   if (!ctx) {
-    return {
-      tickets: 0,
-      consumeTicket: () => false,
-      addLoginBonus: () => {},
-    };
+    throw new Error("useTickets deve estar dentro de TicketProvider");
   }
-
   return ctx;
 }
