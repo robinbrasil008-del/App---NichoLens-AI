@@ -8,7 +8,7 @@ export default function ChatPage() {
     {
       role: "assistant",
       content:
-        "👋 Olá! Sou a IA do NichoLens. Pergunte sobre nicho, Instagram, TikTok ou crescimento nas redes.",
+        "Olá! Sou a IA do NichoLens. Pergunte sobre nicho, Instagram, TikTok ou crescimento nas redes.",
     },
   ]);
   const [input, setInput] = useState("");
@@ -40,13 +40,10 @@ export default function ChatPage() {
         ...prev,
         { role: "assistant", content: data.reply },
       ]);
-    } catch (err) {
+    } catch {
       setMessages((prev) => [
         ...prev,
-        {
-          role: "assistant",
-          content: "⚠️ Erro ao responder. Tente novamente.",
-        },
+        { role: "assistant", content: "Erro ao responder. Tente novamente." },
       ]);
     } finally {
       setLoading(false);
@@ -59,71 +56,70 @@ export default function ChatPage() {
         height: "100%",
         display: "flex",
         flexDirection: "column",
-        background: "linear-gradient(180deg,#0b1020,#0f1b3d)",
+        backgroundColor: "#343541",
+        color: "#ececf1",
+        fontFamily:
+          "-apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, sans-serif",
       }}
     >
       {/* Header */}
       <div
         style={{
           padding: "14px 16px",
-          borderBottom: "1px solid #1f2a4a",
+          borderBottom: "1px solid #4b4c56",
           display: "flex",
           alignItems: "center",
           gap: 12,
+          backgroundColor: "#343541",
         }}
       >
-        <Link href="/" style={{ color: "#9aa4ff", textDecoration: "none" }}>
+        <Link href="/" style={{ color: "#ececf1", textDecoration: "none" }}>
           ←
         </Link>
-        <strong style={{ fontSize: 16 }}>Chat NichoLens AI</strong>
+        <strong>Chat NichoLens AI</strong>
       </div>
 
       {/* Mensagens */}
       <div
         style={{
           flex: 1,
-          padding: 16,
           overflowY: "auto",
-          display: "flex",
-          flexDirection: "column",
-          gap: 12,
         }}
       >
         {messages.map((msg, i) => (
           <div
             key={i}
             style={{
-              alignSelf:
-                msg.role === "user" ? "flex-end" : "flex-start",
-              maxWidth: "80%",
-              padding: "12px 14px",
-              borderRadius: 14,
-              lineHeight: 1.4,
-              background:
-                msg.role === "user"
-                  ? "#7c7cff"
-                  : "#121a35",
-              color: msg.role === "user" ? "#fff" : "#e5e7ff",
-              boxShadow: "0 4px 12px rgba(0,0,0,.25)",
-              whiteSpace: "pre-wrap",
+              padding: "20px 16px",
+              backgroundColor:
+                msg.role === "assistant" ? "#444654" : "#343541",
+              borderBottom: "1px solid #3e3f4b",
             }}
           >
-            {msg.content}
+            <div
+              style={{
+                maxWidth: 720,
+                margin: "0 auto",
+                whiteSpace: "pre-wrap",
+                lineHeight: 1.6,
+                fontSize: 15,
+              }}
+            >
+              {msg.content}
+            </div>
           </div>
         ))}
 
         {loading && (
           <div
             style={{
-              alignSelf: "flex-start",
-              padding: "10px 14px",
-              borderRadius: 14,
-              background: "#121a35",
-              color: "#9aa4ff",
-              fontSize: 14,
+              padding: "20px 16px",
+              backgroundColor: "#444654",
             }}
           >
-            Digitando…
+            <div style={{ maxWidth: 720, margin: "0 auto", opacity: 0.7 }}>
+              Digitando…
+            </div>
           </div>
         )}
 
@@ -133,46 +129,52 @@ export default function ChatPage() {
       {/* Input */}
       <div
         style={{
-          padding: 12,
-          borderTop: "1px solid #1f2a4a",
-          display: "flex",
-          gap: 8,
-          background: "#0b1020",
+          borderTop: "1px solid #4b4c56",
+          padding: "12px",
+          backgroundColor: "#343541",
         }}
       >
-        <input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-          placeholder="Digite sua pergunta…"
+        <div
           style={{
-            flex: 1,
-            padding: "12px 14px",
-            borderRadius: 10,
-            border: "none",
-            outline: "none",
-            background: "#121a35",
-            color: "#fff",
-            fontSize: 15,
-          }}
-        />
-
-        <button
-          onClick={sendMessage}
-          disabled={loading}
-          style={{
-            padding: "0 18px",
-            borderRadius: 10,
-            border: "none",
-            background: "#7c7cff",
-            color: "#fff",
-            fontWeight: "bold",
-            cursor: "pointer",
-            opacity: loading ? 0.6 : 1,
+            maxWidth: 720,
+            margin: "0 auto",
+            display: "flex",
+            gap: 8,
+            backgroundColor: "#40414f",
+            borderRadius: 12,
+            padding: 8,
           }}
         >
-          Enviar
-        </button>
+          <input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+            placeholder="Digite sua mensagem…"
+            style={{
+              flex: 1,
+              background: "transparent",
+              border: "none",
+              outline: "none",
+              color: "#ececf1",
+              fontSize: 15,
+              padding: "8px",
+            }}
+          />
+          <button
+            onClick={sendMessage}
+            disabled={loading}
+            style={{
+              background: "transparent",
+              border: "none",
+              color: "#ececf1",
+              fontSize: 14,
+              cursor: "pointer",
+              opacity: loading ? 0.5 : 1,
+            }}
+          >
+            Enviar
+          </button>
+        </div>
       </div>
     </div>
   );
