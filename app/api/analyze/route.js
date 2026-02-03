@@ -4,15 +4,8 @@ export async function POST(req) {
   try {
     const { url } = await req.json();
 
-    if (!url) {
-      return Response.json(
-        { error: "URL vazia" },
-        { status: 400 }
-      );
-    }
-
-    const openaiRes = await fetch(
-      "https://api.openai.com/v1/chat/completions",
+    const response = await fetch(
+      "https://api.openai.com/v1/responses",
       {
         method: "POST",
         headers: {
@@ -20,24 +13,16 @@ export async function POST(req) {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          model: "gpt-3.5-turbo",
-          messages: [
-            {
-              role: "system",
-              content: "Você é um especialista em análise de perfis de redes sociais."
-            },
-            {
-              role: "user",
-              content: `Analise este perfil e diga o nicho e sugestões: ${url}`
-            }
-          ]
+          model: "gpt-4o-mini",
+          input: `Analise este perfil e diga o nicho e sugestões: ${url}`
         })
       }
     );
 
-    const data = await openaiRes.json();
+    const data = await response.json();
 
-    if (!openaiRes.ok) {
+    if (!response.ok) {
+      console.error(data);
       return Response.json(
         { error: data.error?.message || "Erro OpenAI" },
         { status: 500 }
@@ -45,10 +30,10 @@ export async function POST(req) {
     }
 
     return Response.json({
-      result: data.choices[0].message.content
+      result: data.output_text
     });
 
-  } catch (err) {
+  } catch (e) {
     return Response.json(
       { error: "Erro interno" },
       { status: 500 }
