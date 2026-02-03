@@ -11,7 +11,7 @@ export async function POST(req) {
       );
     }
 
-    const openaiResponse = await fetch(
+    const response = await fetch(
       "https://api.openai.com/v1/responses",
       {
         method: "POST",
@@ -29,9 +29,9 @@ Responda em português, de forma clara e estruturada:
 
 1. Nicho identificado
 2. Tipo de público
-3. Pontos fortes do perfil
+3. Pontos fortes
 4. Pontos fracos
-5. Sugestões práticas de melhoria
+5. Sugestões práticas
 6. Bio otimizada
 7. Ideias de conteúdo
 `
@@ -39,20 +39,24 @@ Responda em português, de forma clara e estruturada:
       }
     );
 
-    const data = await openaiResponse.json();
+    const data = await response.json();
 
-    if (!openaiResponse.ok) {
+    if (!response.ok) {
       return Response.json(
         { error: data.error?.message || "Erro OpenAI" },
         { status: 500 }
       );
     }
 
-    return Response.json({
-      result: data.output_text
-    });
+    // 🔑 EXTRAÇÃO CORRETA DO TEXTO
+    const text =
+      data.output?.[0]?.content?.[0]?.text ||
+      data.output_text ||
+      "⚠️ Resposta vazia da OpenAI";
 
-  } catch (error) {
+    return Response.json({ result: text });
+
+  } catch (err) {
     return Response.json(
       { error: "Erro interno no servidor" },
       { status: 500 }
