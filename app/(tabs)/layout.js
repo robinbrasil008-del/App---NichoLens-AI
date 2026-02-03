@@ -4,11 +4,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { TicketProvider } from "./context/TicketContext";
 
-export default function Layout({ children }) {
+export default function RootLayout({ children }) {
   const pathname = usePathname();
 
-  const isActive = (path) =>
-    pathname === path ? "#7c7cff" : "#b5b5b5";
+  const isActive = (path) => (pathname === path ? "#7c7cff" : "#b5b5b5");
 
   return (
     <html lang="pt-BR">
@@ -24,10 +23,10 @@ export default function Layout({ children }) {
         }}
       >
         <TicketProvider>
-          <main style={{ flex: 1, paddingBottom: 70 }}>
-            {children}
-          </main>
+          {/* Conteúdo */}
+          <main style={{ flex: 1, paddingBottom: 70 }}>{children}</main>
 
+          {/* Barra inferior (abas) */}
           <nav
             style={{
               position: "fixed",
@@ -40,24 +39,19 @@ export default function Layout({ children }) {
               display: "flex",
               justifyContent: "space-around",
               alignItems: "center",
+              zIndex: 9999,
             }}
           >
             <Link
               href="/"
-              style={{
-                textDecoration: "none",
-                color: isActive("/"),
-              }}
+              style={{ textDecoration: "none", color: isActive("/") }}
             >
               🏠 <div style={{ fontSize: 12 }}>Início</div>
             </Link>
 
             <Link
               href="/chat"
-              style={{
-                textDecoration: "none",
-                color: isActive("/chat"),
-              }}
+              style={{ textDecoration: "none", color: isActive("/chat") }}
             >
               💬 <div style={{ fontSize: 12 }}>Chat IA</div>
             </Link>
@@ -66,4 +60,4 @@ export default function Layout({ children }) {
       </body>
     </html>
   );
-}
+                       }
