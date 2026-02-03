@@ -9,12 +9,16 @@ const SUGESTOES = [
   "Como viralizar meus vídeos?",
 ];
 
+const FREE_TICKETS = 7;
+const LOGIN_BONUS = 2;
+
 export default function ChatPage() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [projects, setProjects] = useState([]);
+  const [tickets, setTickets] = useState(FREE_TICKETS);
 
   const chatIdRef = useRef(null);
   const bottomRef = useRef(null);
@@ -22,6 +26,18 @@ export default function ChatPage() {
   const touchStartX = useRef(0);
 
   if (!chatIdRef.current) chatIdRef.current = Date.now();
+
+  /* ===== INIT TICKETS ===== */
+  useEffect(() => {
+    let stored = localStorage.getItem("nicholens-tickets");
+
+    if (stored === null) {
+      localStorage.setItem("nicholens-tickets", FREE_TICKETS);
+      setTickets(FREE_TICKETS);
+    } else {
+      setTickets(Number(stored));
+    }
+  }, []);
 
   /* ===== LOAD PROJECTS ===== */
   useEffect(() => {
@@ -50,6 +66,14 @@ export default function ChatPage() {
     return () => document.removeEventListener("mousedown", handleClick);
   }, [menuOpen]);
 
+  function consumeTicket() {
+    if (tickets <= 0) return false;
+    const newValue = tickets - 1;
+    setTickets(newValue);
+    localStorage.setItem("nicholens-tickets", newValue);
+    return true;
+  }
+
   function generateProjectTitle(msg) {
     if (!msg) return "Novo projeto";
     return msg.length > 40 ? msg.slice(0, 40) + "…" : msg;
@@ -58,6 +82,9 @@ export default function ChatPage() {
   async function sendMessage(text) {
     const msg = text ?? input;
     if (!msg.trim() || loading) return;
+
+    // 🎟️ CHECK TICKET
+    if (!consumeTicket()) return;
 
     setMessages(prev => [...prev, { role: "user", content: msg }]);
     setInput("");
@@ -171,6 +198,7 @@ export default function ChatPage() {
           ☰
         </button>
         <span>Assistente Pedro • Chat-IA</span>
+        <span style={styles.tickets}>🎟️ {tickets}</span>
       </div>
 
       {/* MENU */}
@@ -226,6 +254,7 @@ export default function ChatPage() {
               <button
                 key={i}
                 style={styles.suggestion}
+                disabled={tickets <= 0}
                 onClick={() => sendMessage(s)}
               >
                 {s}
@@ -264,11 +293,20 @@ export default function ChatPage() {
         <input
           value={input}
           onChange={e => setInput(e.target.value)}
-          placeholder="Digite sua mensagem..."
+          placeholder={
+            tickets > 0
+              ? "Digite sua mensagem..."
+              : "Tickets esgotados"
+          }
+          disabled={tickets <= 0}
           style={styles.input}
           onKeyDown={e => e.key === "Enter" && sendMessage()}
         />
-        <button onClick={() => sendMessage()} style={styles.send}>
+        <button
+          onClick={() => sendMessage()}
+          style={styles.send}
+          disabled={tickets <= 0}
+        >
           Enviar
         </button>
       </div>
@@ -290,8 +328,14 @@ const styles = {
     padding: 14,
     display: "flex",
     gap: 12,
+    alignItems: "center",
     background: "#0d1020",
     fontWeight: 600,
+  },
+  tickets: {
+    marginLeft: "auto",
+    fontSize: 13,
+    opacity: 0.85,
   },
   menuBtn: {
     background: "none",
