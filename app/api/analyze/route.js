@@ -4,7 +4,14 @@ export async function POST(req) {
   try {
     const { url } = await req.json();
 
-    const response = await fetch(
+    if (!url) {
+      return Response.json(
+        { error: "URL não informada" },
+        { status: 400 }
+      );
+    }
+
+    const openaiResponse = await fetch(
       "https://api.openai.com/v1/responses",
       {
         method: "POST",
@@ -14,15 +21,27 @@ export async function POST(req) {
         },
         body: JSON.stringify({
           model: "gpt-4o-mini",
-          input: `Analise este perfil e diga o nicho e sugestões: ${url}`
+          input: `
+Analise o perfil desta URL:
+${url}
+
+Responda em português, de forma clara e estruturada:
+
+1. Nicho identificado
+2. Tipo de público
+3. Pontos fortes do perfil
+4. Pontos fracos
+5. Sugestões práticas de melhoria
+6. Bio otimizada
+7. Ideias de conteúdo
+`
         })
       }
     );
 
-    const data = await response.json();
+    const data = await openaiResponse.json();
 
-    if (!response.ok) {
-      console.error(data);
+    if (!openaiResponse.ok) {
       return Response.json(
         { error: data.error?.message || "Erro OpenAI" },
         { status: 500 }
@@ -33,9 +52,9 @@ export async function POST(req) {
       result: data.output_text
     });
 
-  } catch (e) {
+  } catch (error) {
     return Response.json(
-      { error: "Erro interno" },
+      { error: "Erro interno no servidor" },
       { status: 500 }
     );
   }
