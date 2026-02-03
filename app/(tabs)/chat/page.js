@@ -1,56 +1,179 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
+import Link from "next/link";
 
 export default function ChatPage() {
-  const [msg, setMsg] = useState("");
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState([
+    {
+      role: "assistant",
+      content:
+        "👋 Olá! Sou a IA do NichoLens. Pergunte sobre nicho, Instagram, TikTok ou crescimento nas redes.",
+    },
+  ]);
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const bottomRef = useRef(null);
 
-  async function send() {
-    if (!msg) return;
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
-    const res = await fetch("/api/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: msg })
-    });
+  async function sendMessage() {
+    if (!input.trim() || loading) return;
 
-    const data = await res.json();
+    const userMessage = { role: "user", content: input };
+    setMessages((prev) => [...prev, userMessage]);
+    setInput("");
+    setLoading(true);
 
-    setMessages(prev => [
-      ...prev,
-      { role: "Você", text: msg },
-      { role: "IA", text: data.reply }
-    ]);
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: input }),
+      });
 
-    setMsg("");
+      const data = await res.json();
+
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: data.reply },
+      ]);
+    } catch (err) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: "⚠️ Erro ao responder. Tente novamente.",
+        },
+      ]);
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
-    <div style={{ padding: 20 }}>
-      <h2>Chat NichoLens AI</h2>
-
-      <div style={{ marginBottom: 20 }}>
-        {messages.map((m, i) => (
-          <p key={i}>
-            <b>{m.role}:</b> {m.text}
-          </p>
-        ))}
+    <div
+      style={{
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        background: "linear-gradient(180deg,#0b1020,#0f1b3d)",
+      }}
+    >
+      {/* Header */}
+      <div
+        style={{
+          padding: "14px 16px",
+          borderBottom: "1px solid #1f2a4a",
+          display: "flex",
+          alignItems: "center",
+          gap: 12,
+        }}
+      >
+        <Link href="/" style={{ color: "#9aa4ff", textDecoration: "none" }}>
+          ←
+        </Link>
+        <strong style={{ fontSize: 16 }}>Chat NichoLens AI</strong>
       </div>
 
-      <input
-        value={msg}
-        onChange={e => setMsg(e.target.value)}
-        placeholder="Digite sua pergunta"
-        style={{ width: "100%", padding: 10, marginBottom: 10 }}
-      />
-
-      <button
-        onClick={send}
-        style={{ width: "100%", padding: 12 }}
+      {/* Mensagens */}
+      <div
+        style={{
+          flex: 1,
+          padding: 16,
+          overflowY: "auto",
+          display: "flex",
+          flexDirection: "column",
+          gap: 12,
+        }}
       >
-        Enviar
-      </button>
+        {messages.map((msg, i) => (
+          <div
+            key={i}
+            style={{
+              alignSelf:
+                msg.role === "user" ? "flex-end" : "flex-start",
+              maxWidth: "80%",
+              padding: "12px 14px",
+              borderRadius: 14,
+              lineHeight: 1.4,
+              background:
+                msg.role === "user"
+                  ? "#7c7cff"
+                  : "#121a35",
+              color: msg.role === "user" ? "#fff" : "#e5e7ff",
+              boxShadow: "0 4px 12px rgba(0,0,0,.25)",
+              whiteSpace: "pre-wrap",
+            }}
+          >
+            {msg.content}
+          </div>
+        ))}
+
+        {loading && (
+          <div
+            style={{
+              alignSelf: "flex-start",
+              padding: "10px 14px",
+              borderRadius: 14,
+              background: "#121a35",
+              color: "#9aa4ff",
+              fontSize: 14,
+            }}
+          >
+            Digitando…
+          </div>
+        )}
+
+        <div ref={bottomRef} />
+      </div>
+
+      {/* Input */}
+      <div
+        style={{
+          padding: 12,
+          borderTop: "1px solid #1f2a4a",
+          display: "flex",
+          gap: 8,
+          background: "#0b1020",
+        }}
+      >
+        <input
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+          placeholder="Digite sua pergunta…"
+          style={{
+            flex: 1,
+            padding: "12px 14px",
+            borderRadius: 10,
+            border: "none",
+            outline: "none",
+            background: "#121a35",
+            color: "#fff",
+            fontSize: 15,
+          }}
+        />
+
+        <button
+          onClick={sendMessage}
+          disabled={loading}
+          style={{
+            padding: "0 18px",
+            borderRadius: 10,
+            border: "none",
+            background: "#7c7cff",
+            color: "#fff",
+            fontWeight: "bold",
+            cursor: "pointer",
+            opacity: loading ? 0.6 : 1,
+          }}
+        >
+          Enviar
+        </button>
+      </div>
     </div>
   );
-          }
+}
