@@ -1,21 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { TicketProvider } from "../context/TicketContext";
 
 export default function TabsLayout({ children }) {
-  const pathname = usePathname();
-
-  const isActive = (path) =>
-    pathname === path ? "#7c7cff" : "#b5b5b5";
-
   return (
     <TicketProvider>
-      <>
-        <main style={{ flex: 1, paddingBottom: 70 }}>
-          {children}
-        </main>
+      <div style={{ minHeight: "100vh", paddingBottom: 70 }}>
+        {children}
 
         <nav
           style={{
@@ -32,35 +24,31 @@ export default function TabsLayout({ children }) {
             zIndex: 100,
           }}
         >
-          <Link
-            href="/"
-            style={{
-              textDecoration: "none",
-              color: isActive("/"),
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-            }}
-          >
-            🏠
-            <div style={{ fontSize: 12 }}>Início</div>
-          </Link>
-
-          <Link
-            href="/chat"
-            style={{
-              textDecoration: "none",
-              color: isActive("/chat"),
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-            }}
-          >
-            💬
-            <div style={{ fontSize: 12 }}>Chat IA</div>
-          </Link>
+          <TabLink href="/" label="Início" icon="🏠" />
+          <TabLink href="/chat" label="Chat IA" icon="💬" />
         </nav>
-      </>
+      </div>
     </TicketProvider>
+  );
+}
+
+/* ===== COMPONENTE DE LINK (CLIENT SAFE) ===== */
+
+function TabLink({ href, label, icon }) {
+  return (
+    <Link
+      href={href}
+      style={{
+        textDecoration: "none",
+        color: "#b5b5b5",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        fontSize: 12,
+      }}
+    >
+      <span style={{ fontSize: 18 }}>{icon}</span>
+      {label}
+    </Link>
   );
 }
