@@ -21,34 +21,46 @@ export default function Home() {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || "Erro");
+        throw new Error(data.error);
       }
 
       setResult(data.result);
-    } catch (e) {
-      setResult("❌ ERRO AO ANALISAR");
+    } catch (err) {
+      setResult("❌ Erro ao analisar perfil");
     }
 
     setLoading(false);
   }
 
   return (
-    <main style={{ padding: 20, maxWidth: 600 }}>
-      <h1>NichoLens AI (ZERO)</h1>
+    <main style={{ padding: 20, maxWidth: 700 }}>
+      <h1>NichoLens AI</h1>
 
       <input
-        placeholder="Cole a URL do perfil"
+        placeholder="Cole a URL do perfil (Instagram, TikTok, etc)"
         value={url}
-        onChange={e => setUrl(e.target.value)}
-        style={{ width: "100%", padding: 10, marginBottom: 10 }}
+        onChange={(e) => setUrl(e.target.value)}
+        style={{
+          width: "100%",
+          padding: 10,
+          marginBottom: 10
+        }}
       />
 
-      <button onClick={analisar} style={{ padding: 10 }}>
-        {loading ? "Analisando..." : "Analisar"}
+      <button
+        onClick={analisar}
+        style={{ padding: 10 }}
+      >
+        {loading ? "Analisando..." : "Analisar Perfil"}
       </button>
 
       {result && (
-        <pre style={{ marginTop: 20, whiteSpace: "pre-wrap" }}>
+        <pre style={{
+          marginTop: 20,
+          whiteSpace: "pre-wrap",
+          background: "#f4f4f4",
+          padding: 15
+        }}>
           {result}
         </pre>
       )}
