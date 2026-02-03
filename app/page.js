@@ -7,6 +7,7 @@ export default function Page() {
   const [loading, setLoading] = useState(false);
 
   async function analisar() {
+    if (!url) return;
     setLoading(true);
     setAnalysis("");
 
@@ -17,16 +18,16 @@ export default function Page() {
     });
 
     const data = await res.json();
-    setAnalysis(data.result || data.error || "Erro ao analisar");
+    setAnalysis(data.result || "");
     setLoading(false);
   }
 
   return (
     <main style={styles.bg}>
       <div style={styles.card}>
-        <h1 style={styles.title}>🔍 NichoLens AI</h1>
+        <h1 style={styles.logo}>🔍 NichoLens AI</h1>
         <p style={styles.subtitle}>
-          Análise estratégica de perfis para crescer nas redes sociais
+          Diagnóstico estratégico para crescer nas redes sociais
         </p>
 
         <input
@@ -36,26 +37,19 @@ export default function Page() {
           onChange={(e) => setUrl(e.target.value)}
         />
 
-        <button style={styles.button} onClick={analisar} disabled={loading}>
-          {loading ? "Analisando..." : "Analisar Perfil"}
+        <button style={styles.button} onClick={analisar}>
+          {loading ? "Analisando perfil..." : "🚀 Analisar Perfil"}
         </button>
 
         {analysis && (
-          <div style={styles.analysisBox}>
-            <Section title="🎯 Nicho Identificado" text={extract(analysis, 1)} />
-            <Section title="👥 Público-Alvo" text={extract(analysis, 2)} />
-            <Section title="✅ Pontos Fortes" text={extract(analysis, 3)} />
-            <Section title="⚠️ Pontos Fracos" text={extract(analysis, 4)} />
-            <Section title="🚀 Sugestões Práticas" text={extract(analysis, 5)} />
-            <Section title="🧬 Bio Otimizada" text={extract(analysis, 6)} />
-            <Section title="💡 Ideias de Conteúdo" text={extract(analysis, 7)} />
-
-            <button
-              style={styles.copy}
-              onClick={() => navigator.clipboard.writeText(analysis)}
-            >
-              📋 Copiar Análise Completa
-            </button>
+          <div style={styles.results}>
+            <Section title="🎯 Nicho Identificado" text={get(analysis, 1)} />
+            <Section title="👥 Público-Alvo" text={get(analysis, 2)} />
+            <Section title="✅ Pontos Fortes" text={get(analysis, 3)} />
+            <Section title="⚠️ Pontos Fracos" text={get(analysis, 4)} />
+            <Section title="🚀 Sugestões Práticas" text={get(analysis, 5)} />
+            <Section title="🧬 Bio Otimizada" text={get(analysis, 6)} />
+            <Section title="💡 Ideias de Conteúdo" text={get(analysis, 7)} />
           </div>
         )}
       </div>
@@ -65,99 +59,116 @@ export default function Page() {
 
 function Section({ title, text }) {
   if (!text) return null;
+
   return (
     <div style={styles.section}>
-      <h3 style={styles.sectionTitle}>{title}</h3>
+      <div style={styles.sectionHeader}>
+        <h3 style={styles.sectionTitle}>{title}</h3>
+        <button
+          style={styles.copy}
+          onClick={() => navigator.clipboard.writeText(text)}
+        >
+          Copiar
+        </button>
+      </div>
       <p style={styles.sectionText}>{text}</p>
     </div>
   );
 }
 
-// Extrai blocos pelo número da seção (1 a 7)
-function extract(text, n) {
+function get(text, n) {
   const parts = text.split("###");
   const section = parts.find((p) => p.trim().startsWith(n + "."));
   return section
-    ? section.replace(/\*\*/g, "").replace(/\n+/g, "\n").trim()
+    ? section.replace(/\*\*/g, "").replace(/^\d+\.\s*/gm, "").trim()
     : "";
 }
 
 const styles = {
   bg: {
     minHeight: "100vh",
-    background: "#0f172a",
+    background:
+      "radial-gradient(circle at top, #1e1b4b 0%, #020617 60%)",
     display: "flex",
     justifyContent: "center",
-    padding: 20,
+    padding: 24,
   },
   card: {
-    background: "#fff",
-    maxWidth: 820,
     width: "100%",
-    borderRadius: 20,
-    padding: 30,
-    boxShadow: "0 25px 60px rgba(0,0,0,0.4)",
+    maxWidth: 880,
+    background: "#020617",
+    borderRadius: 24,
+    padding: 28,
+    boxShadow: "0 40px 120px rgba(0,0,0,0.8)",
   },
-  title: {
+  logo: {
     textAlign: "center",
     marginBottom: 6,
+    letterSpacing: 0.5,
   },
   subtitle: {
     textAlign: "center",
-    color: "#555",
-    marginBottom: 24,
+    color: "#94a3b8",
+    marginBottom: 26,
+    fontSize: 14,
   },
   input: {
     width: "100%",
     padding: 14,
-    fontSize: 16,
-    borderRadius: 10,
-    border: "1px solid #ccc",
+    borderRadius: 12,
+    border: "1px solid #1e293b",
+    background: "#020617",
+    color: "#fff",
     marginBottom: 12,
+    outline: "none",
   },
   button: {
     width: "100%",
     padding: 14,
-    background: "#111827",
-    color: "#fff",
-    fontWeight: 600,
-    borderRadius: 10,
+    borderRadius: 12,
     border: "none",
+    background: "linear-gradient(90deg,#6366f1,#8b5cf6)",
+    color: "#fff",
+    fontWeight: 700,
     cursor: "pointer",
-    marginBottom: 20,
+    marginBottom: 24,
   },
-  analysisBox: {
-    background: "#f8fafc",
-    borderRadius: 16,
-    padding: 20,
+  results: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 16,
   },
   section: {
-    background: "#fff",
-    borderRadius: 12,
+    background: "#020617",
+    border: "1px solid #1e293b",
+    borderRadius: 16,
     padding: 16,
-    marginBottom: 14,
-    border: "1px solid #e5e7eb",
+  },
+  sectionHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 8,
   },
   sectionTitle: {
     margin: 0,
-    marginBottom: 8,
-    fontSize: 16,
+    fontSize: 15,
+    color: "#e5e7eb",
   },
   sectionText: {
     margin: 0,
     fontSize: 14,
     lineHeight: 1.6,
+    color: "#cbd5f5",
     whiteSpace: "pre-line",
   },
   copy: {
-    marginTop: 20,
-    width: "100%",
-    padding: 12,
-    background: "#4f46e5",
+    background: "#1e293b",
     color: "#fff",
-    borderRadius: 10,
     border: "none",
-    fontWeight: 600,
+    padding: "6px 12px",
+    borderRadius: 999,
+    fontSize: 12,
     cursor: "pointer",
   },
 };
