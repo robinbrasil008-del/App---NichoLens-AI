@@ -176,12 +176,14 @@ export default function ChatPage() {
                 <button
                   onClick={() => renameProject(p.id)}
                   title="Renomear"
+                  style={styles.iconBtn}
                 >
                   ✏️
                 </button>
                 <button
                   onClick={() => deleteProject(p.id)}
                   title="Excluir"
+                  style={styles.iconBtn}
                 >
                   🗑️
                 </button>
@@ -229,9 +231,11 @@ export default function ChatPage() {
                   : "#2a2f45",
             }}
           >
-            {m.content.split("\n").map((l, j) => (
-              <div key={j}>{l}</div>
-            ))}
+            {String(m.content || "")
+              .split("\n")
+              .map((l, j) => (
+                <div key={j}>{l}</div>
+              ))}
           </div>
         ))}
 
@@ -283,6 +287,7 @@ const styles = {
     border: "none",
     color: "#fff",
     fontSize: 20,
+    cursor: "pointer",
   },
   menu: {
     position: "absolute",
@@ -306,12 +311,14 @@ const styles = {
     border: "none",
     color: "#fff",
     textAlign: "left",
+    cursor: "pointer",
   },
   projectItem: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 6,
+    gap: 8,
   },
   projectBtn: {
     background: "none",
@@ -319,10 +326,21 @@ const styles = {
     color: "#fff",
     flex: 1,
     textAlign: "left",
+    cursor: "pointer",
+    padding: 6,
+    borderRadius: 8,
   },
   projectActions: {
     display: "flex",
     gap: 6,
+  },
+  iconBtn: {
+    background: "transparent",
+    border: "none",
+    color: "#fff",
+    cursor: "pointer",
+    padding: 6,
+    borderRadius: 8,
   },
   menuEmpty: {
     opacity: 0.5,
@@ -348,25 +366,31 @@ const styles = {
     background: "transparent",
     color: "#cfd3ff",
     padding: "8px 16px",
+    cursor: "pointer",
   },
+
+  // ✅ Ajuste do "vazio": paddingBottom alinhado ao input fixo
   chat: {
     padding: 16,
-    paddingBottom: 140,
+    paddingBottom: 88, // <-- AQUI (antes 140)
     display: "flex",
     flexDirection: "column",
     gap: 12,
     overflowY: "auto",
     height: "calc(100vh - 60px)",
   },
+
   bubble: {
     maxWidth: "85%",
     padding: 14,
     borderRadius: 16,
     background: "#2a2f45",
   },
+
+  // ✅ Ajuste do input acima do banner (sem espaço sobrando)
   inputFixed: {
     position: "fixed",
-    bottom: 60,
+    bottom: 56, // <-- AQUI (antes 60)
     left: 0,
     right: 0,
     display: "flex",
@@ -376,6 +400,7 @@ const styles = {
     borderTop: "1px solid #1f2440",
     zIndex: 40,
   },
+
   input: {
     flex: 1,
     padding: 14,
@@ -390,5 +415,6 @@ const styles = {
     borderRadius: 12,
     padding: "0 20px",
     color: "#fff",
+    cursor: "pointer",
   },
 };
