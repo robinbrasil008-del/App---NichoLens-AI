@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
+import { useEffect, useState } from "react";
 
 const SUGESTOES = [
   "Qual é o meu nicho?",
@@ -14,15 +13,36 @@ export default function ChatPage() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [projects, setProjects] = useState([]);
+
+  // 🔹 Carrega projetos salvos
+  useEffect(() => {
+    const saved = JSON.parse(localStorage.getItem("nicholens-projects")) || [];
+    setProjects(saved);
+  }, []);
+
+  // 🔹 Salva automaticamente quando mensagens mudam
+  useEffect(() => {
+    if (messages.length === 0) return;
+
+    const newProject = {
+      id: Date.now(),
+      date: new Date().toLocaleString(),
+      messages,
+    };
+
+    const updated = [newProject, ...projects];
+    setProjects(updated);
+    localStorage.setItem("nicholens-projects", JSON.stringify(updated));
+    // eslint-disable-next-line
+  }, [messages]);
 
   async function sendMessage(text) {
-    const messageToSend = text ?? input;
-    if (!messageToSend.trim()) return;
+    const msg = text ?? input;
+    if (!msg.trim()) return;
 
-    setMessages((prev) => [
-      ...prev,
-      { role: "user", content: messageToSend },
-    ]);
+    setMessages((prev) => [...prev, { role: "user", content: msg }]);
     setInput("");
     setLoading(true);
 
@@ -30,7 +50,7 @@ export default function ChatPage() {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: messageToSend }),
+        body: JSON.stringify({ message: msg }),
       });
 
       const data = await res.json();
@@ -42,94 +62,121 @@ export default function ChatPage() {
     } catch {
       setMessages((prev) => [
         ...prev,
-        {
-          role: "assistant",
-          content: "❌ Erro ao responder. Tente novamente.",
-        },
+        { role: "assistant", content: "Erro ao responder." },
       ]);
     } finally {
       setLoading(false);
     }
   }
 
+  function newChat() {
+    setMessages([]);
+    setMenuOpen(false);
+  }
+
+  function loadProject(p) {
+    setMessages(p.messages);
+    setMenuOpen(false);
+  }
+
   return (
     <div style={styles.page}>
-      {/* Header */}
+      {/* HEADER */}
       <div style={styles.header}>
-        <Link href="/" style={styles.back}>←</Link>
+        <button onClick={() => setMenuOpen(!menuOpen)} style={styles.menuBtn}>
+          ☰
+        </button>
         <span>Assistente Pedro • Chat-IA</span>
       </div>
 
-      <div style={styles.main}>
-        {/* Aviso OpenAI + Sugestões */}
-        {messages.length === 0 && (
-          <div style={styles.intro}>
-            <div style={styles.openaiInfo}>
-              🔒 O NichoLens utiliza a tecnologia{" "}
-              <strong>OpenAI – ChatGPT</strong> para esta conversa.
-            </div>
+      {/* MENU */}
+      {menuOpen && (
+        <div style={styles.menu}>
+          <button style={styles.menuItem} onClick={newChat}>
+            ➕ Novo chat
+          </button>
 
-            <div style={styles.suggestions}>
-              {SUGESTOES.map((s, i) => (
-                <button
-                  key={i}
-                  style={styles.suggestion}
-                  onClick={() => sendMessage(s)}
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
+          <div style={styles.menuTitle}>📁 Projetos salvos</div>
+
+          {projects.length === 0 && (
+            <div style={styles.menuEmpty}>Nenhum projeto ainda</div>
+          )}
+
+          {projects.map((p) => (
+            <button
+              key={p.id}
+              style={styles.menuItem}
+              onClick={() => loadProject(p)}
+            >
+              {p.date}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* INTRO */}
+      {messages.length === 0 && (
+        <div style={styles.intro}>
+          <div style={styles.openai}>
+            🔒 O NichoLens usa <b>OpenAI – ChatGPT</b> nesta conversa
+          </div>
+
+          <div style={styles.suggestions}>
+            {SUGESTOES.map((s, i) => (
+              <button
+                key={i}
+                style={styles.suggestion}
+                onClick={() => sendMessage(s)}
+              >
+                {s}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* CHAT */}
+      <div style={styles.chat}>
+        {messages.map((m, i) => (
+          <div
+            key={i}
+            style={{
+              ...styles.bubble,
+              alignSelf: m.role === "user" ? "flex-end" : "flex-start",
+              background: m.role === "user" ? "#6d5dfc" : "#2a2f45",
+            }}
+          >
+            {m.content.split("\n").map((l, j) => (
+              <div key={j}>{l}</div>
+            ))}
+          </div>
+        ))}
+
+        {loading && (
+          <div style={{ ...styles.bubble, background: "#2a2f45" }}>
+            Digitando...
           </div>
         )}
+      </div>
 
-        {/* Chat */}
-        <div style={styles.chat}>
-          {messages.map((msg, i) => (
-            <div
-              key={i}
-              style={{
-                ...styles.bubble,
-                alignSelf:
-                  msg.role === "user" ? "flex-end" : "flex-start",
-                background:
-                  msg.role === "user" ? "#6d5dfc" : "#2a2f45",
-              }}
-            >
-              {msg.content.split("\n").map((line, idx) => (
-                <div key={idx} style={{ marginBottom: 6 }}>
-                  {line}
-                </div>
-              ))}
-            </div>
-          ))}
-
-          {loading && (
-            <div style={{ ...styles.bubble, background: "#2a2f45" }}>
-              Digitando...
-            </div>
-          )}
-        </div>
-
-        {/* Input */}
-        <div style={styles.inputArea}>
-          <input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Digite sua mensagem..."
-            style={styles.input}
-            onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-          />
-          <button onClick={() => sendMessage()} style={styles.button}>
-            Enviar
-          </button>
-        </div>
+      {/* INPUT */}
+      <div style={styles.inputArea}>
+        <input
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Digite sua mensagem..."
+          style={styles.input}
+          onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+        />
+        <button onClick={() => sendMessage()} style={styles.send}>
+          Enviar
+        </button>
       </div>
     </div>
   );
 }
 
-const BANNER_HEIGHT = 70;
+/* ====== STYLES ====== */
 
 const styles = {
   page: {
@@ -141,45 +188,70 @@ const styles = {
   },
   header: {
     padding: 14,
-    background: "#0d1020",
     display: "flex",
     alignItems: "center",
     gap: 12,
+    background: "#0d1020",
     fontWeight: 600,
   },
-  back: {
-    color: "#aaa",
-    textDecoration: "none",
-    fontSize: 18,
+  menuBtn: {
+    background: "none",
+    border: "none",
+    color: "#fff",
+    fontSize: 20,
+    cursor: "pointer",
   },
-  main: {
-    flex: 1,
-    display: "flex",
-    flexDirection: "column",
-    position: "relative",
+  menu: {
+    position: "absolute",
+    top: 55,
+    left: 10,
+    background: "#141836",
+    borderRadius: 12,
+    padding: 10,
+    width: 260,
+    zIndex: 10,
+  },
+  menuTitle: {
+    fontSize: 13,
+    opacity: 0.7,
+    margin: "8px 0",
+  },
+  menuItem: {
+    width: "100%",
+    background: "none",
+    border: "none",
+    color: "#fff",
+    textAlign: "left",
+    padding: 8,
+    cursor: "pointer",
+    borderRadius: 8,
+  },
+  menuEmpty: {
+    fontSize: 13,
+    opacity: 0.5,
+    padding: 6,
   },
   intro: {
     padding: 20,
     textAlign: "center",
   },
-  openaiInfo: {
+  openai: {
     opacity: 0.7,
     fontSize: 14,
     marginBottom: 16,
   },
   suggestions: {
     display: "flex",
-    flexWrap: "wrap",
+    flexDirection: "column",
     gap: 10,
-    justifyContent: "center",
+    alignItems: "center",
   },
   suggestion: {
-    padding: "8px 14px",
+    padding: "8px 16px",
     borderRadius: 20,
     border: "1px solid #2a2f45",
     background: "transparent",
     color: "#cfd3ff",
-    fontSize: 14,
     cursor: "pointer",
   },
   chat: {
@@ -189,7 +261,6 @@ const styles = {
     flexDirection: "column",
     gap: 12,
     overflowY: "auto",
-    paddingBottom: 110,
   },
   bubble: {
     maxWidth: "85%",
@@ -197,16 +268,12 @@ const styles = {
     borderRadius: 16,
     fontSize: 15,
     lineHeight: 1.6,
-    whiteSpace: "pre-wrap",
   },
   inputArea: {
-    position: "sticky",
-    bottom: BANNER_HEIGHT,
     display: "flex",
     gap: 10,
     padding: 12,
     background: "#0d1020",
-    borderTop: "1px solid #1a1f36",
   },
   input: {
     flex: 1,
@@ -216,11 +283,11 @@ const styles = {
     background: "#1a1f36",
     color: "#fff",
   },
-  button: {
-    padding: "0 20px",
-    borderRadius: 12,
-    border: "none",
+  send: {
     background: "#6d5dfc",
+    border: "none",
+    borderRadius: 12,
+    padding: "0 20px",
     color: "#fff",
     fontWeight: 600,
     cursor: "pointer",
