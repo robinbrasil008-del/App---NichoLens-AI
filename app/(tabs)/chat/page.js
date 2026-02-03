@@ -18,6 +18,8 @@ export default function ChatPage() {
 
   const chatIdRef = useRef(null);
   const bottomRef = useRef(null);
+  const menuRef = useRef(null);
+  const touchStartX = useRef(0);
 
   if (!chatIdRef.current) chatIdRef.current = Date.now();
 
@@ -32,6 +34,21 @@ export default function ChatPage() {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
+
+  /* ===== CLICK OUTSIDE TO CLOSE MENU ===== */
+  useEffect(() => {
+    function handleClick(e) {
+      if (
+        menuOpen &&
+        menuRef.current &&
+        !menuRef.current.contains(e.target)
+      ) {
+        setMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [menuOpen]);
 
   function generateProjectTitle(msg) {
     if (!msg) return "Novo projeto";
@@ -136,7 +153,15 @@ export default function ChatPage() {
   }
 
   return (
-    <div style={styles.page}>
+    <div
+      style={styles.page}
+      onTouchStart={e => (touchStartX.current = e.touches[0].clientX)}
+      onTouchEnd={e => {
+        const delta =
+          e.changedTouches[0].clientX - touchStartX.current;
+        if (menuOpen && delta < -50) setMenuOpen(false);
+      }}
+    >
       {/* HEADER */}
       <div style={styles.header}>
         <button
@@ -150,7 +175,7 @@ export default function ChatPage() {
 
       {/* MENU */}
       {menuOpen && (
-        <div style={styles.menu}>
+        <div style={styles.menu} ref={menuRef}>
           <button style={styles.menuItem} onClick={newChat}>
             ➕ Novo chat
           </button>
@@ -158,9 +183,7 @@ export default function ChatPage() {
           <div style={styles.menuTitle}>📁 Projetos salvos</div>
 
           {projects.length === 0 && (
-            <div style={styles.menuEmpty}>
-              Nenhum projeto ainda
-            </div>
+            <div style={styles.menuEmpty}>Nenhum projeto ainda</div>
           )}
 
           {projects.map(p => (
@@ -220,13 +243,9 @@ export default function ChatPage() {
             style={{
               ...styles.bubble,
               alignSelf:
-                m.role === "user"
-                  ? "flex-end"
-                  : "flex-start",
+                m.role === "user" ? "flex-end" : "flex-start",
               background:
-                m.role === "user"
-                  ? "#6d5dfc"
-                  : "#2a2f45",
+                m.role === "user" ? "#6d5dfc" : "#2a2f45",
             }}
           >
             {String(m.content).split("\n").map((l, j) => (
@@ -235,14 +254,12 @@ export default function ChatPage() {
           </div>
         ))}
 
-        {loading && (
-          <div style={styles.bubble}>Digitando…</div>
-        )}
+        {loading && <div style={styles.bubble}>Digitando…</div>}
 
         <div ref={bottomRef} />
       </div>
 
-      {/* INPUT FIXO ACIMA DO BANNER */}
+      {/* INPUT FIXO */}
       <div style={styles.inputFixed}>
         <input
           value={input}
@@ -352,9 +369,9 @@ const styles = {
     padding: "8px 16px",
   },
   chat: {
-    flex: 1,                // ✅ CHAVE DA SOLUÇÃO
+    flex: 1,
     padding: 16,
-    paddingBottom: 90,      // espaço exato do input
+    paddingBottom: 90,
     overflowY: "auto",
     display: "flex",
     flexDirection: "column",
