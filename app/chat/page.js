@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 
 export default function ChatPage() {
@@ -13,9 +13,14 @@ export default function ChatPage() {
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const bottomRef = useRef(null);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   async function sendMessage() {
-    if (!input.trim() || loading) return;
+    if (!input.trim()) return;
 
     const userMessage = { role: "user", content: input };
     setMessages((prev) => [...prev, userMessage]);
@@ -26,89 +31,145 @@ export default function ChatPage() {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: userMessage.content }),
+        body: JSON.stringify({ message: input }),
       });
 
       const data = await res.json();
 
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: data.reply },
+        { role: "assistant", content: data.reply || "Erro ao responder." },
       ]);
     } catch {
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: "Erro ao conectar com a IA." },
+        { role: "assistant", content: "❌ Erro ao conectar com a IA." },
       ]);
-    } finally {
-      setLoading(false);
     }
+
+    setLoading(false);
   }
 
   return (
-    <main
-      style={{
-        maxWidth: 900,
-        margin: "40px auto",
-        padding: 24,
-        background: "#12162a",
-        borderRadius: 20,
-      }}
-    >
-      <Link href="/" style={{ color: "#a5b4fc", textDecoration: "none" }}>
-        ← Voltar para Home
-      </Link>
+    <main style={styles.app}>
+      {/* HEADER */}
+      <header style={styles.header}>
+        <Link href="/" style={styles.back}>
+          ← Voltar
+        </Link>
+        <h1 style={styles.title}>💬 Chat NichoLens AI</h1>
+      </header>
 
-      <h1 style={{ margin: "20px 0" }}>💬 Chat NichoLens AI</h1>
-
-      <div style={{ marginBottom: 20 }}>
+      {/* MENSAGENS */}
+      <section style={styles.chat}>
         {messages.map((msg, i) => (
           <div
             key={i}
             style={{
-              marginBottom: 12,
-              padding: 14,
-              borderRadius: 14,
-              background:
-                msg.role === "user" ? "#1f2937" : "#1e1b4b",
+              ...styles.bubble,
+              ...(msg.role === "user"
+                ? styles.userBubble
+                : styles.aiBubble),
             }}
           >
-            <strong>{msg.role === "user" ? "Você" : "IA"}:</strong>{" "}
             {msg.content}
           </div>
         ))}
-        {loading && <p>Digitando...</p>}
-      </div>
+        <div ref={bottomRef} />
+      </section>
 
-      <input
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        placeholder="Digite sua pergunta..."
-        onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-        style={{
-          width: "100%",
-          padding: 14,
-          borderRadius: 12,
-          border: "none",
-          marginBottom: 10,
-        }}
-      />
-
-      <button
-        onClick={sendMessage}
-        style={{
-          width: "100%",
-          padding: 14,
-          borderRadius: 12,
-          background: "linear-gradient(135deg, #22c55e, #16a34a)",
-          color: "#fff",
-          fontWeight: "bold",
-          border: "none",
-          cursor: "pointer",
-        }}
-      >
-        Enviar
-      </button>
+      {/* INPUT FIXO */}
+      <footer style={styles.inputBar}>
+        <input
+          style={styles.input}
+          placeholder="Digite sua pergunta..."
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+        />
+        <button style={styles.send} onClick={sendMessage} disabled={loading}>
+          {loading ? "..." : "Enviar"}
+        </button>
+      </footer>
     </main>
   );
-        }
+}
+
+/* ESTILO APP */
+const styles = {
+  app: {
+    height: "100vh",
+    display: "flex",
+    flexDirection: "column",
+    background: "linear-gradient(180deg,#0f172a,#020617)",
+    color: "#fff",
+    fontFamily: "system-ui, -apple-system, Segoe UI, Roboto",
+  },
+  header: {
+    padding: "14px",
+    borderBottom: "1px solid rgba(255,255,255,0.08)",
+    display: "flex",
+    alignItems: "center",
+    gap: 12,
+  },
+  back: {
+    color: "#a5b4fc",
+    textDecoration: "none",
+    fontWeight: 700,
+  },
+  title: {
+    margin: 0,
+    fontSize: 16,
+    fontWeight: 800,
+  },
+  chat: {
+    flex: 1,
+    padding: 16,
+    overflowY: "auto",
+    display: "flex",
+    flexDirection: "column",
+    gap: 10,
+  },
+  bubble: {
+    maxWidth: "78%",
+    padding: "12px 14px",
+    borderRadius: 16,
+    fontSize: 14,
+    lineHeight: 1.5,
+    wordBreak: "break-word",
+  },
+  aiBubble: {
+    background: "#1e293b",
+    alignSelf: "flex-start",
+    borderBottomLeftRadius: 4,
+  },
+  userBubble: {
+    background: "linear-gradient(135deg,#4f46e5,#7c3aed)",
+    alignSelf: "flex-end",
+    borderBottomRightRadius: 4,
+  },
+  inputBar: {
+    display: "flex",
+    padding: 12,
+    gap: 10,
+    borderTop: "1px solid rgba(255,255,255,0.08)",
+    background: "#020617",
+  },
+  input: {
+    flex: 1,
+    padding: 12,
+    borderRadius: 999,
+    border: "none",
+    outline: "none",
+    fontSize: 14,
+  },
+  send: {
+    padding: "0 18px",
+    borderRadius: 999,
+    border: "none",
+    background: "#22c55e",
+    color: "#022c22",
+    fontWeight: 900,
+    cursor: "pointer",
+  },
+};
