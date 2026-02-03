@@ -1,5 +1,3 @@
-import "./globals.css";
-
 export const metadata = {
   title: "NichoLens AI",
   description: "Análise estratégica de perfis com IA",
