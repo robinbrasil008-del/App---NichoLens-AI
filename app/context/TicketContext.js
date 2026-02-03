@@ -5,42 +5,52 @@ import { createContext, useContext, useEffect, useState } from "react";
 const TicketContext = createContext(null);
 
 const FREE_TICKETS = 7;
-const LOGIN_BONUS = 2; // preparado para login futuro
+const LOGIN_BONUS = 2;
 
 export function TicketProvider({ children }) {
   const [tickets, setTickets] = useState(FREE_TICKETS);
 
-  // 🔹 carregar do localStorage (fonte única)
+  // 🔹 carregar tickets
   useEffect(() => {
     const saved = localStorage.getItem("nicholens-tickets");
     if (saved !== null) {
       setTickets(Number(saved));
     } else {
       localStorage.setItem("nicholens-tickets", String(FREE_TICKETS));
+      setTickets(FREE_TICKETS);
     }
   }, []);
 
-  // 🔹 consumir ticket (GLOBAL)
-  function consumeTicket() {
-    if (tickets <= 0) return false;
+  // 🔹 sincronizar ENTRE páginas (chat ↔ home)
+  useEffect(() => {
+    function sync(e) {
+      if (e.key === "nicholens-tickets") {
+        setTickets(Number(e.newValue || 0));
+      }
+    }
+    window.addEventListener("storage", sync);
+    return () => window.removeEventListener("storage", sync);
+  }, []);
 
-    const next = tickets - 1;
-    setTickets(next);
+  function consumeTicket() {
+    const current = Number(localStorage.getItem("nicholens-tickets") || 0);
+    if (current <= 0) return false;
+
+    const next = current - 1;
     localStorage.setItem("nicholens-tickets", String(next));
+    setTickets(next);
     return true;
   }
 
-  // 🔹 bônus futuro (login)
   function addLoginBonus() {
-    const next = tickets + LOGIN_BONUS;
-    setTickets(next);
+    const current = Number(localStorage.getItem("nicholens-tickets") || 0);
+    const next = current + LOGIN_BONUS;
     localStorage.setItem("nicholens-tickets", String(next));
+    setTickets(next);
   }
 
   return (
-    <TicketContext.Provider
-      value={{ tickets, consumeTicket, addLoginBonus }}
-    >
+    <TicketContext.Provider value={{ tickets, consumeTicket, addLoginBonus }}>
       {children}
     </TicketContext.Provider>
   );
