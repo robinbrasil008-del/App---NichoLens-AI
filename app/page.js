@@ -24,27 +24,44 @@ export default function Page() {
 
   return (
     <main style={styles.page}>
-      <div style={styles.card}>
-        <h1 style={styles.title}>NichoLens AI</h1>
-        <p style={styles.subtitle}>
-          Cole a URL do perfil e receba uma análise estratégica com IA
+      <div style={styles.container}>
+        <h1 style={styles.logo}>🔍 NichoLens AI</h1>
+        <p style={styles.tagline}>
+          Descubra o nicho, pontos fracos e como crescer seu perfil nas redes
         </p>
 
-        <input
-          style={styles.input}
-          placeholder="https://www.instagram.com/usuario"
-          value={url}
-          onChange={(e) => setUrl(e.target.value)}
-        />
+        <div style={styles.inputBox}>
+          <input
+            style={styles.input}
+            placeholder="Cole a URL do Instagram, TikTok ou YouTube"
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+          />
 
-        <button style={styles.button} onClick={analisar} disabled={loading}>
-          {loading ? "Analisando..." : "Analisar Perfil"}
-        </button>
+          <button
+            style={{
+              ...styles.button,
+              opacity: loading ? 0.7 : 1,
+            }}
+            onClick={analisar}
+            disabled={loading}
+          >
+            {loading ? "🔎 Analisando..." : "🚀 Analisar Perfil"}
+          </button>
+        </div>
 
         {result && (
-          <pre style={styles.result}>
-            {result}
-          </pre>
+          <section style={styles.resultCard}>
+            <h2 style={styles.resultTitle}>📊 Diagnóstico do Perfil</h2>
+            <div style={styles.resultText}>{result}</div>
+
+            <button
+              style={styles.copyButton}
+              onClick={() => navigator.clipboard.writeText(result)}
+            >
+              📋 Copiar Análise
+            </button>
+          </section>
         )}
       </div>
     </main>
@@ -54,54 +71,80 @@ export default function Page() {
 const styles = {
   page: {
     minHeight: "100vh",
-    background: "#f4f6fb",
+    background: "linear-gradient(135deg, #0f0f0f, #1c1c1c)",
     display: "flex",
     justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
+    padding: "40px 16px",
   },
-  card: {
-    background: "#fff",
-    maxWidth: 700,
+  container: {
     width: "100%",
-    padding: 30,
-    borderRadius: 12,
-    boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
+    maxWidth: 820,
+    background: "#ffffff",
+    borderRadius: 20,
+    padding: 32,
+    boxShadow: "0 30px 60px rgba(0,0,0,0.25)",
   },
-  title: {
+  logo: {
     margin: 0,
-    fontSize: 28,
     textAlign: "center",
+    fontSize: 34,
+    fontWeight: 800,
   },
-  subtitle: {
+  tagline: {
     textAlign: "center",
     color: "#555",
-    marginBottom: 20,
+    marginBottom: 30,
+    fontSize: 16,
+  },
+  inputBox: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 12,
+    marginBottom: 30,
   },
   input: {
     width: "100%",
-    padding: 12,
+    padding: "14px 16px",
     fontSize: 16,
-    marginBottom: 12,
-    borderRadius: 6,
-    border: "1px solid #ccc",
+    borderRadius: 10,
+    border: "1px solid #ddd",
+    outline: "none",
   },
   button: {
-    width: "100%",
-    padding: 12,
+    padding: "14px",
     fontSize: 16,
+    borderRadius: 10,
+    border: "none",
     background: "#000",
     color: "#fff",
-    border: "none",
-    borderRadius: 6,
     cursor: "pointer",
+    fontWeight: 600,
   },
-  result: {
-    marginTop: 20,
+  resultCard: {
+    background: "#f8f9fc",
+    borderRadius: 16,
+    padding: 24,
+    border: "1px solid #e5e7eb",
+  },
+  resultTitle: {
+    marginTop: 0,
+    marginBottom: 16,
+    fontSize: 22,
+  },
+  resultText: {
     whiteSpace: "pre-wrap",
-    background: "#f0f0f0",
-    padding: 15,
-    borderRadius: 6,
-    fontSize: 14,
+    fontSize: 15,
+    lineHeight: 1.6,
+    color: "#222",
+  },
+  copyButton: {
+    marginTop: 20,
+    padding: "12px 16px",
+    borderRadius: 10,
+    border: "none",
+    background: "#4f46e5",
+    color: "#fff",
+    cursor: "pointer",
+    fontWeight: 600,
   },
 };
