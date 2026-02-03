@@ -13,35 +13,40 @@ export async function POST(req) {
       );
     }
 
-    const client = new OpenAI({
+    const openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY
     });
 
-    const prompt = `
-Você é um especialista em redes sociais.
-
+    const completion = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: [
+        {
+          role: "system",
+          content:
+            "Você é um especialista em redes sociais e análise de nichos."
+        },
+        {
+          role: "user",
+          content: `
 Analise o perfil a partir desta URL:
 ${url}
 
 Responda em português.
 
-1. Identifique automaticamente o NICHO do perfil
-2. Avalie se o perfil é adequado para um nicho informal
+1. Identifique o NICHO do perfil
+2. Avalie se está adequado para nicho informal
 3. Liste pontos fortes
 4. Liste pontos fracos
 5. Sugira melhorias práticas
 6. Crie uma BIO otimizada
-7. Sugira uma estratégia de conteúdo
-`;
-
-    const response = await client.responses.create({
-      model: "gpt-4o-mini",
-      input: prompt
+7. Sugira estratégia de conteúdo
+`
+        }
+      ],
+      temperature: 0.7
     });
 
-    const text =
-      response.output_text ||
-      response.output?.[0]?.content?.[0]?.text;
+    const text = completion.choices[0].message.content;
 
     return Response.json({ result: text });
 
