@@ -14,7 +14,6 @@ export async function POST(req) {
         },
         body: JSON.stringify({
           model: "gpt-4o-mini",
-          temperature: 0.7,
           messages: [
             {
               role: "system",
@@ -23,22 +22,19 @@ export async function POST(req) {
             },
             { role: "user", content: message },
           ],
+          temperature: 0.7,
         }),
       }
     );
 
     const data = await response.json();
 
-    if (!response.ok) {
-      return NextResponse.json({ error: data }, { status: 500 });
-    }
-
     return NextResponse.json({
       reply: data.choices[0].message.content,
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
-      { error: "Erro interno no servidor" },
+      { error: "Erro interno" },
       { status: 500 }
     );
   }
