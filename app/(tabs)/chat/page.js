@@ -3,26 +3,26 @@
 import { useState } from "react";
 import Link from "next/link";
 
+const SUGESTOES = [
+  "Qual é o meu nicho?",
+  "Ideias de conteúdo para Instagram",
+  "Como crescer no TikTok?",
+  "Como viralizar meus vídeos?",
+];
+
 export default function ChatPage() {
-  const [messages, setMessages] = useState([
-    {
-      role: "assistant",
-      content:
-        "👋 Olá! Eu sou o **Pedro**, seu especialista em crescimento nas redes sociais.\n\nPergunte sobre nicho, Instagram, TikTok, conteúdo ou estratégias.",
-    },
-  ]);
+  const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function sendMessage() {
-    if (!input.trim()) return;
+  async function sendMessage(text) {
+    const messageToSend = text ?? input;
+    if (!messageToSend.trim()) return;
 
-    const userMessage = {
-      role: "user",
-      content: input,
-    };
-
-    setMessages((prev) => [...prev, userMessage]);
+    setMessages((prev) => [
+      ...prev,
+      { role: "user", content: messageToSend },
+    ]);
     setInput("");
     setLoading(true);
 
@@ -30,7 +30,7 @@ export default function ChatPage() {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: input }),
+        body: JSON.stringify({ message: messageToSend }),
       });
 
       const data = await res.json();
@@ -57,12 +57,33 @@ export default function ChatPage() {
       {/* Header */}
       <div style={styles.header}>
         <Link href="/" style={styles.back}>←</Link>
-        <span>Chat NichoLens AI</span>
+        <span>Assistente Pedro • Chat-IA</span>
       </div>
 
-      {/* Área principal */}
       <div style={styles.main}>
-        {/* Mensagens */}
+        {/* Aviso OpenAI + Sugestões */}
+        {messages.length === 0 && (
+          <div style={styles.intro}>
+            <div style={styles.openaiInfo}>
+              🔒 O NichoLens utiliza a tecnologia{" "}
+              <strong>OpenAI – ChatGPT</strong> para esta conversa.
+            </div>
+
+            <div style={styles.suggestions}>
+              {SUGESTOES.map((s, i) => (
+                <button
+                  key={i}
+                  style={styles.suggestion}
+                  onClick={() => sendMessage(s)}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Chat */}
         <div style={styles.chat}>
           {messages.map((msg, i) => (
             <div
@@ -72,9 +93,7 @@ export default function ChatPage() {
                 alignSelf:
                   msg.role === "user" ? "flex-end" : "flex-start",
                 background:
-                  msg.role === "user"
-                    ? "#6d5dfc"
-                    : "#2a2f45",
+                  msg.role === "user" ? "#6d5dfc" : "#2a2f45",
               }}
             >
               {msg.content.split("\n").map((line, idx) => (
@@ -92,7 +111,7 @@ export default function ChatPage() {
           )}
         </div>
 
-        {/* Input FIXO acima do banner */}
+        {/* Input */}
         <div style={styles.inputArea}>
           <input
             value={input}
@@ -101,7 +120,7 @@ export default function ChatPage() {
             style={styles.input}
             onKeyDown={(e) => e.key === "Enter" && sendMessage()}
           />
-          <button onClick={sendMessage} style={styles.button}>
+          <button onClick={() => sendMessage()} style={styles.button}>
             Enviar
           </button>
         </div>
@@ -110,24 +129,23 @@ export default function ChatPage() {
   );
 }
 
-const BANNER_HEIGHT = 70; // altura do menu inferior
+const BANNER_HEIGHT = 70;
 
 const styles = {
   page: {
     height: "100vh",
     display: "flex",
     flexDirection: "column",
-    background:
-      "linear-gradient(180deg, #0f1225 0%, #090b17 100%)",
+    background: "linear-gradient(180deg,#0f1225,#090b17)",
     color: "#fff",
   },
   header: {
-    padding: "14px",
+    padding: 14,
     background: "#0d1020",
     display: "flex",
     alignItems: "center",
     gap: 12,
-    fontWeight: "600",
+    fontWeight: 600,
   },
   back: {
     color: "#aaa",
@@ -140,18 +158,42 @@ const styles = {
     flexDirection: "column",
     position: "relative",
   },
+  intro: {
+    padding: 20,
+    textAlign: "center",
+  },
+  openaiInfo: {
+    opacity: 0.7,
+    fontSize: 14,
+    marginBottom: 16,
+  },
+  suggestions: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: 10,
+    justifyContent: "center",
+  },
+  suggestion: {
+    padding: "8px 14px",
+    borderRadius: 20,
+    border: "1px solid #2a2f45",
+    background: "transparent",
+    color: "#cfd3ff",
+    fontSize: 14,
+    cursor: "pointer",
+  },
   chat: {
     flex: 1,
-    padding: "16px",
+    padding: 16,
     display: "flex",
     flexDirection: "column",
     gap: 12,
     overflowY: "auto",
-    paddingBottom: 100, // espaço para o input
+    paddingBottom: 110,
   },
   bubble: {
     maxWidth: "85%",
-    padding: "14px",
+    padding: 14,
     borderRadius: 16,
     fontSize: 15,
     lineHeight: 1.6,
@@ -162,16 +204,15 @@ const styles = {
     bottom: BANNER_HEIGHT,
     display: "flex",
     gap: 10,
-    padding: "12px",
+    padding: 12,
     background: "#0d1020",
     borderTop: "1px solid #1a1f36",
   },
   input: {
     flex: 1,
-    padding: "14px",
+    padding: 14,
     borderRadius: 12,
     border: "none",
-    outline: "none",
     background: "#1a1f36",
     color: "#fff",
   },
@@ -181,7 +222,7 @@ const styles = {
     border: "none",
     background: "#6d5dfc",
     color: "#fff",
-    fontWeight: "600",
+    fontWeight: 600,
     cursor: "pointer",
   },
 };
