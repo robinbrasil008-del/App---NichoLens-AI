@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useTickets } from "./context/TicketContext";
+import { useTickets } from "../context/TicketContext";
 
 export default function Page() {
   const [url, setUrl] = useState("");
@@ -9,7 +9,7 @@ export default function Page() {
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState("");
 
-  const { tickets, consumeTicket } = useTickets();
+  const { tickets, useTicket } = useTickets();
 
   useEffect(() => {
     const id = "font-plus-jakarta";
@@ -27,7 +27,7 @@ export default function Page() {
     if (!url || loading) return;
 
     // 🎟️ CHECK GLOBAL TICKET
-    if (!consumeTicket()) {
+    if (!useTicket()) {
       alert("❌ Seus tickets acabaram! Faça login ou assine o plano PRO.");
       return;
     }
@@ -97,48 +97,13 @@ export default function Page() {
 
         {analysis && (
           <section style={styles.results}>
-            <Block
-              title="🎯 Nicho Identificado"
-              text={get(analysis, 1)}
-              copied={copied === "nicho"}
-              onCopy={() => copy("nicho", get(analysis, 1))}
-            />
-            <Block
-              title="👥 Público-Alvo"
-              text={get(analysis, 2)}
-              copied={copied === "publico"}
-              onCopy={() => copy("publico", get(analysis, 2))}
-            />
-            <Block
-              title="✅ Pontos Fortes"
-              text={get(analysis, 3)}
-              copied={copied === "fortes"}
-              onCopy={() => copy("fortes", get(analysis, 3))}
-            />
-            <Block
-              title="⚠️ Pontos Fracos"
-              text={get(analysis, 4)}
-              copied={copied === "fracos"}
-              onCopy={() => copy("fracos", get(analysis, 4))}
-            />
-            <Block
-              title="🚀 Sugestões Práticas"
-              text={get(analysis, 5)}
-              copied={copied === "sugestoes"}
-              onCopy={() => copy("sugestoes", get(analysis, 5))}
-            />
-            <Block
-              title="🧬 Bio Otimizada"
-              text={get(analysis, 6)}
-              copied={copied === "bio"}
-              onCopy={() => copy("bio", get(analysis, 6))}
-            />
-            <Block
-              title="💡 Ideias de Conteúdo"
-              text={get(analysis, 7)}
-              copied={copied === "ideias"}
-              onCopy={() => copy("ideias", get(analysis, 7))}
-            />
+            <Block title="🎯 Nicho Identificado" text={get(analysis, 1)} />
+            <Block title="👥 Público-Alvo" text={get(analysis, 2)} />
+            <Block title="✅ Pontos Fortes" text={get(analysis, 3)} />
+            <Block title="⚠️ Pontos Fracos" text={get(analysis, 4)} />
+            <Block title="🚀 Sugestões Práticas" text={get(analysis, 5)} />
+            <Block title="🧬 Bio Otimizada" text={get(analysis, 6)} />
+            <Block title="💡 Ideias de Conteúdo" text={get(analysis, 7)} />
 
             <button
               style={styles.copyAll}
@@ -153,17 +118,12 @@ export default function Page() {
   );
 }
 
-function Block({ title, text, onCopy, copied }) {
+function Block({ title, text }) {
   if (!text) return null;
 
   return (
     <div style={styles.block}>
-      <div style={styles.blockHeader}>
-        <h3 style={styles.blockTitle}>{title}</h3>
-        <button style={styles.copyBtn} onClick={onCopy}>
-          {copied ? "✅ Copiado" : "Copiar"}
-        </button>
-      </div>
+      <h3 style={styles.blockTitle}>{title}</h3>
       <p style={styles.blockText}>{text}</p>
     </div>
   );
@@ -193,12 +153,7 @@ const styles = {
   header: { textAlign: "center", marginBottom: 14 },
   title: { margin: 0, fontSize: 34, fontWeight: 900 },
   subtitle: { marginTop: 6, color: "#475569", fontSize: 13 },
-  tickets: {
-    marginTop: 6,
-    fontSize: 13,
-    fontWeight: 800,
-    opacity: 0.85,
-  },
+  tickets: { marginTop: 6, fontSize: 13, fontWeight: 800 },
   card: {
     background: "#fff",
     borderRadius: 18,
@@ -206,12 +161,7 @@ const styles = {
     boxShadow: "0 18px 40px rgba(15,23,42,0.12)",
     marginBottom: 16,
   },
-  label: {
-    fontSize: 12,
-    fontWeight: 800,
-    color: "#64748b",
-    textTransform: "uppercase",
-  },
+  label: { fontSize: 12, fontWeight: 800, color: "#64748b" },
   input: {
     width: "100%",
     padding: 14,
@@ -238,22 +188,7 @@ const styles = {
     padding: 14,
     boxShadow: "0 10px 22px rgba(15,23,42,0.08)",
   },
-  blockHeader: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 8,
-  },
   blockTitle: { margin: 0, fontSize: 16, fontWeight: 900 },
-  copyBtn: {
-    border: "1px solid rgba(2,6,23,0.12)",
-    background: "#fff",
-    padding: "6px 12px",
-    borderRadius: 999,
-    cursor: "pointer",
-    fontWeight: 800,
-    fontSize: 12,
-  },
   blockText: { fontSize: 14, lineHeight: 1.6, whiteSpace: "pre-line" },
   copyAll: {
     marginTop: 6,
