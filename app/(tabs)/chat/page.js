@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 
 export default function ChatPage() {
@@ -8,31 +8,29 @@ export default function ChatPage() {
     {
       role: "assistant",
       content:
-        "Oi! Eu sou o Pedro 😊\nSou a IA do NichoLens.\nPode me perguntar sobre nicho, Instagram, TikTok ou crescimento nas redes sociais.",
+        "👋 Olá! Eu sou o **Pedro**, seu especialista em crescimento nas redes sociais.\n\nPergunte sobre nicho, Instagram, TikTok, conteúdo ou estratégias.",
     },
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const bottomRef = useRef(null);
-
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
 
   async function sendMessage() {
-    if (!input.trim() || loading) return;
+    if (!input.trim()) return;
 
-    const userText = input;
+    const userMessage = {
+      role: "user",
+      content: input,
+    };
+
+    setMessages((prev) => [...prev, userMessage]);
     setInput("");
-
-    setMessages((prev) => [...prev, { role: "user", content: userText }]);
     setLoading(true);
 
     try {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: userText }),
+        body: JSON.stringify({ message: input }),
       });
 
       const data = await res.json();
@@ -46,7 +44,7 @@ export default function ChatPage() {
         ...prev,
         {
           role: "assistant",
-          content: "Ops 😅 deu um erro aqui. Tenta de novo!",
+          content: "❌ Erro ao responder. Tente novamente.",
         },
       ]);
     } finally {
@@ -55,139 +53,120 @@ export default function ChatPage() {
   }
 
   return (
-    <div
-      style={{
-        height: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        backgroundColor: "#0f172a",
-        color: "#e5e7eb",
-        fontFamily:
-          "-apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, sans-serif",
-      }}
-    >
+    <div style={styles.page}>
       {/* Header */}
-      <div
-        style={{
-          height: 56,
-          display: "flex",
-          alignItems: "center",
-          gap: 12,
-          padding: "0 16px",
-          borderBottom: "1px solid #1f2937",
-          backgroundColor: "#111827",
-          flexShrink: 0,
-        }}
-      >
-        <Link href="/" style={{ color: "#e5e7eb", textDecoration: "none" }}>
-          ←
-        </Link>
-        <strong>Pedro • IA NichoLens</strong>
+      <div style={styles.header}>
+        <Link href="/" style={styles.back}>←</Link>
+        <span>Chat NichoLens AI</span>
       </div>
 
       {/* Mensagens */}
-      <div
-        style={{
-          flex: 1,
-          overflowY: "auto",
-          padding: "16px",
-          display: "flex",
-          flexDirection: "column",
-          gap: 12,
-        }}
-      >
+      <div style={styles.chat}>
         {messages.map((msg, i) => (
           <div
             key={i}
             style={{
-              alignSelf: msg.role === "user" ? "flex-end" : "flex-start",
-              maxWidth: "80%",
-              backgroundColor:
-                msg.role === "user" ? "#2563eb" : "#1f2937",
-              color: "#e5e7eb",
-              padding: "12px 14px",
-              borderRadius: 16,
-              borderBottomRightRadius:
-                msg.role === "user" ? 4 : 16,
-              borderBottomLeftRadius:
-                msg.role === "assistant" ? 4 : 16,
-              whiteSpace: "pre-wrap",
-              lineHeight: 1.5,
-              fontSize: 15,
+              ...styles.bubble,
+              alignSelf:
+                msg.role === "user" ? "flex-end" : "flex-start",
+              background:
+                msg.role === "user"
+                  ? "#6d5dfc"
+                  : "#2a2f45",
             }}
           >
-            {msg.content}
+            {msg.content.split("\n").map((line, idx) => (
+              <div key={idx} style={{ marginBottom: 6 }}>
+                {line}
+              </div>
+            ))}
           </div>
         ))}
 
         {loading && (
-          <div
-            style={{
-              alignSelf: "flex-start",
-              backgroundColor: "#1f2937",
-              padding: "10px 14px",
-              borderRadius: 16,
-              fontSize: 14,
-              opacity: 0.7,
-            }}
-          >
-            Pedro está digitando…
+          <div style={{ ...styles.bubble, background: "#2a2f45" }}>
+            Digitando...
           </div>
         )}
-
-        <div ref={bottomRef} />
       </div>
 
       {/* Input fixo embaixo */}
-      <div
-        style={{
-          padding: "10px",
-          borderTop: "1px solid #1f2937",
-          backgroundColor: "#111827",
-          flexShrink: 0,
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            gap: 8,
-            backgroundColor: "#1f2937",
-            borderRadius: 999,
-            padding: "8px 12px",
-          }}
-        >
-          <input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-            placeholder="Digite sua mensagem…"
-            style={{
-              flex: 1,
-              background: "transparent",
-              border: "none",
-              outline: "none",
-              color: "#e5e7eb",
-              fontSize: 15,
-            }}
-          />
-          <button
-            onClick={sendMessage}
-            disabled={loading}
-            style={{
-              backgroundColor: "#2563eb",
-              border: "none",
-              color: "#fff",
-              padding: "6px 14px",
-              borderRadius: 999,
-              fontSize: 14,
-              cursor: "pointer",
-              opacity: loading ? 0.6 : 1,
-            }}
-          >
-            Enviar
-          </button>
-        </div>
+      <div style={styles.inputArea}>
+        <input
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Digite sua mensagem..."
+          style={styles.input}
+          onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+        />
+        <button onClick={sendMessage} style={styles.button}>
+          Enviar
+        </button>
       </div>
     </div>
   );
-              }
+}
+
+const styles = {
+  page: {
+    height: "100vh",
+    display: "flex",
+    flexDirection: "column",
+    background:
+      "linear-gradient(180deg, #0f1225 0%, #090b17 100%)",
+    color: "#fff",
+  },
+  header: {
+    padding: "14px",
+    background: "#0d1020",
+    display: "flex",
+    alignItems: "center",
+    gap: 12,
+    fontWeight: "600",
+  },
+  back: {
+    color: "#aaa",
+    textDecoration: "none",
+    fontSize: 18,
+  },
+  chat: {
+    flex: 1,
+    padding: "16px",
+    display: "flex",
+    flexDirection: "column",
+    gap: 12,
+    overflowY: "auto",
+  },
+  bubble: {
+    maxWidth: "85%",
+    padding: "14px",
+    borderRadius: 16,
+    fontSize: 15,
+    lineHeight: 1.6,
+    whiteSpace: "pre-wrap",
+  },
+  inputArea: {
+    display: "flex",
+    padding: "12px",
+    gap: 10,
+    background: "#0d1020",
+  },
+  input: {
+    flex: 1,
+    padding: "14px",
+    borderRadius: 12,
+    border: "none",
+    outline: "none",
+    background: "#1a1f36",
+    color: "#fff",
+  },
+  button: {
+    padding: "0 20px",
+    borderRadius: 12,
+    border: "none",
+    background: "#6d5dfc",
+    color: "#fff",
+    fontWeight: "600",
+    cursor: "pointer",
+  },
+};
