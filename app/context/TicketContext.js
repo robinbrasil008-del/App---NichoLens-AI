@@ -2,18 +2,21 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 
-const TicketContext = createContext(null);
+const TicketContext = createContext(undefined);
 
 export function TicketProvider({ children }) {
-  const [tickets, setTickets] = useState(7); // FREE = 7
+  const [tickets, setTickets] = useState(7);
 
   useEffect(() => {
     const saved = localStorage.getItem("nicholens-tickets");
-    if (saved) setTickets(Number(saved));
+    if (saved !== null) {
+      const n = Number(saved);
+      if (!Number.isNaN(n)) setTickets(n);
+    }
   }, []);
 
   useEffect(() => {
-    localStorage.setItem("nicholens-tickets", tickets);
+    localStorage.setItem("nicholens-tickets", String(tickets));
   }, [tickets]);
 
   function useTicket() {
@@ -22,19 +25,28 @@ export function TicketProvider({ children }) {
     return true;
   }
 
-  function addTickets(qtd) {
-    setTickets(t => t + qtd);
-  }
+  const value = {
+    tickets,
+    useTicket,
+  };
 
   return (
-    <TicketContext.Provider
-      value={{ tickets, useTicket, addTickets }}
-    >
+    <TicketContext.Provider value={value}>
       {children}
     </TicketContext.Provider>
   );
 }
 
 export function useTickets() {
-  return useContext(TicketContext);
+  const ctx = useContext(TicketContext);
+
+  // 🔒 BLINDAGEM TOTAL (EVITA TELA BRANCA)
+  if (!ctx) {
+    return {
+      tickets: 0,
+      useTicket: () => false,
+    };
+  }
+
+  return ctx;
 }
