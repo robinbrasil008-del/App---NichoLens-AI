@@ -1,69 +1,52 @@
 "use client";
 
-import { useState } from "react";
-import { useTickets } from "../context/TicketContext";
+import Link from "next/link";
+import { TicketProvider } from "../context/TicketContext";
 
-export default function Page() {
-  const [url, setUrl] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [analysis, setAnalysis] = useState("");
-
-  const { tickets, consumeTicket } = useTickets();
-
-  async function analisar() {
-    if (!url || loading) return;
-
-    // 🎟️ TICKET GLOBAL
-    if (!consumeTicket()) {
-      alert("❌ Seus tickets acabaram!");
-      return;
-    }
-
-    setLoading(true);
-    setAnalysis("");
-
-    try {
-      const res = await fetch("/api/analyze", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url }),
-      });
-
-      const data = await res.json();
-      setAnalysis(data.result || "Sem resposta");
-    } catch {
-      setAnalysis("Erro ao analisar.");
-    } finally {
-      setLoading(false);
-    }
-  }
-
+export default function TabsLayout({ children }) {
   return (
-    <main style={{ padding: 20 }}>
-      <h1>NichoLens AI</h1>
+    <TicketProvider>
+      <div style={{ minHeight: "100vh", paddingBottom: 60 }}>
+        {children}
 
-      <div style={{ marginBottom: 10 }}>🎟️ Tickets: {tickets}</div>
+        <nav
+          style={{
+            position: "fixed",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: 60,
+            background: "#0f1630",
+            borderTop: "1px solid #1f2a4a",
+            display: "flex",
+            justifyContent: "space-around",
+            alignItems: "center",
+            zIndex: 100,
+          }}
+        >
+          <TabLink href="/" label="Início" icon="🏠" />
+          <TabLink href="/chat" label="Chat IA" icon="💬" />
+        </nav>
+      </div>
+    </TicketProvider>
+  );
+}
 
-      <input
-        value={url}
-        onChange={e => setUrl(e.target.value)}
-        placeholder="URL do perfil"
-        style={{ width: "100%", padding: 12, marginBottom: 10 }}
-      />
-
-      <button
-        onClick={analisar}
-        disabled={tickets <= 0}
-        style={{ padding: 12, width: "100%" }}
-      >
-        {loading ? "Analisando..." : "🚀 Analisar Perfil"}
-      </button>
-
-      {analysis && (
-        <pre style={{ marginTop: 20, whiteSpace: "pre-wrap" }}>
-          {analysis}
-        </pre>
-      )}
-    </main>
+function TabLink({ href, label, icon }) {
+  return (
+    <Link
+      href={href}
+      style={{
+        textDecoration: "none",
+        color: "#b5b5b5",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        fontSize: 12,
+      }}
+    >
+      <span style={{ fontSize: 18 }}>{icon}</span>
+      {label}
+    </Link>
   );
 }
