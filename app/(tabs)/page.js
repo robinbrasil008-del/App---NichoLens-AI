@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { useTickets } from "../context/TicketContext"; // ✅ CAMINHO CORRETO
+import { useTickets } from "../context/TicketContext";
 
 export default function HomePage() {
-  const { tickets, consumeTicket } = useTickets(); // 🎟️ GLOBAL
+  const { tickets, consumeTicket } = useTickets();
 
   const [url, setUrl] = useState("");
   const [analysis, setAnalysis] = useState("");
@@ -13,7 +13,6 @@ export default function HomePage() {
   async function analisar() {
     if (!url.trim() || loading) return;
 
-    // 🎟️ CONSUME TICKET GLOBAL
     if (!consumeTicket()) return;
 
     setLoading(true);
@@ -27,9 +26,9 @@ export default function HomePage() {
       });
 
       const data = await res.json();
-      setAnalysis(data.result || "❌ Nenhum resultado retornado.");
+      setAnalysis(data.result || "Nenhum resultado retornado.");
     } catch {
-      setAnalysis("❌ Erro ao analisar o perfil.");
+      setAnalysis("Erro ao analisar o perfil.");
     } finally {
       setLoading(false);
     }
@@ -43,7 +42,7 @@ export default function HomePage() {
         <div style={styles.tickets}>🎟️ {tickets}</div>
       </header>
 
-      {/* CARD */}
+      {/* CARD INPUT */}
       <div style={styles.card}>
         <input
           value={url}
@@ -58,7 +57,6 @@ export default function HomePage() {
           style={{
             ...styles.button,
             opacity: tickets <= 0 ? 0.6 : 1,
-            cursor: tickets <= 0 ? "not-allowed" : "pointer",
           }}
           disabled={tickets <= 0}
         >
@@ -68,12 +66,20 @@ export default function HomePage() {
 
       {/* RESULTADO */}
       {analysis && (
-        <div style={styles.result}>
-          {analysis.split("\n").map((line, i) => (
-            <p key={i} style={styles.resultText}>
-              {line}
-            </p>
-          ))}
+        <div style={styles.resultCard}>
+          {analysis
+            .replace(/\*\*/g, "")
+            .split("###")
+            .filter(Boolean)
+            .map((block, i) => (
+              <div key={i} style={styles.block}>
+                {block.split("\n").map((line, j) => (
+                  <p key={j} style={styles.text}>
+                    {line}
+                  </p>
+                ))}
+              </div>
+            ))}
         </div>
       )}
     </div>
@@ -88,61 +94,78 @@ const styles = {
     padding: 20,
     paddingBottom: 90,
     background:
-      "radial-gradient(1200px 600px at 20% 0%, #e9edff 0%, #f7f8ff 40%, #eef2ff 100%)",
-    fontFamily: "system-ui, -apple-system, Segoe UI, Roboto",
+      "linear-gradient(180deg, #0f1225 0%, #151a3a 40%, #0b0f24 100%)",
+    fontFamily:
+      '"Plus Jakarta Sans", system-ui, -apple-system, Segoe UI, Roboto',
+    color: "#fff",
   },
+
   header: {
     display: "flex",
     alignItems: "center",
-    marginBottom: 20,
+    marginBottom: 24,
   },
+
   title: {
-    fontSize: 32,
+    fontSize: 34,
     fontWeight: 900,
     margin: 0,
+    letterSpacing: -0.5,
   },
+
   tickets: {
     marginLeft: "auto",
-    fontWeight: 800,
     fontSize: 14,
+    fontWeight: 800,
+    opacity: 0.9,
   },
+
   card: {
-    background: "#fff",
-    borderRadius: 18,
-    padding: 16,
-    boxShadow: "0 18px 40px rgba(15,23,42,0.12)",
-    maxWidth: 480,
+    background: "#ffffff",
+    borderRadius: 20,
+    padding: 18,
+    boxShadow: "0 20px 40px rgba(0,0,0,0.25)",
+    maxWidth: 520,
   },
+
   input: {
     width: "100%",
     padding: 14,
     borderRadius: 14,
-    border: "1px solid rgba(2,6,23,0.12)",
-    marginBottom: 12,
+    border: "1px solid #d1d5db",
+    marginBottom: 14,
     fontSize: 15,
   },
+
   button: {
     width: "100%",
     padding: 14,
     borderRadius: 14,
     border: "none",
-    background: "linear-gradient(90deg,#4f46e5,#7c3aed)",
+    background: "linear-gradient(90deg,#6d5dfc,#8b5cf6)",
     color: "#fff",
     fontWeight: 900,
     fontSize: 15,
+    cursor: "pointer",
   },
-  result: {
-    marginTop: 20,
-    background: "#fff",
-    borderRadius: 18,
-    padding: 16,
-    boxShadow: "0 10px 22px rgba(15,23,42,0.08)",
-    maxWidth: 720,
+
+  resultCard: {
+    marginTop: 24,
+    background: "#1c2142",
+    borderRadius: 20,
+    padding: 18,
+    maxWidth: 820,
+    boxShadow: "0 20px 40px rgba(0,0,0,0.35)",
   },
-  resultText: {
-    fontSize: 14,
-    lineHeight: 1.6,
-    marginBottom: 8,
-    whiteSpace: "pre-line",
+
+  block: {
+    marginBottom: 16,
+  },
+
+  text: {
+    fontSize: 15,
+    lineHeight: 1.7,
+    marginBottom: 6,
+    opacity: 0.95,
   },
 };
