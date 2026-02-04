@@ -14,16 +14,16 @@ export function TicketProvider({ children }) {
     if (saved !== null) {
       setTickets(Number(saved));
     } else {
-      localStorage.setItem("nicholens-tickets", String(FREE_TICKETS));
+      localStorage.setItem("nicholens-tickets", FREE_TICKETS);
     }
   }, []);
 
-  function consumeTicket(amount = 1) {
-    if (tickets < amount) return false;
+  function consumeTicket() {
+    if (tickets <= 0) return false;
 
-    const next = tickets - amount;
+    const next = tickets - 1;
     setTickets(next);
-    localStorage.setItem("nicholens-tickets", String(next));
+    localStorage.setItem("nicholens-tickets", next);
     return true;
   }
 
@@ -37,7 +37,7 @@ export function TicketProvider({ children }) {
 export function useTickets() {
   const ctx = useContext(TicketContext);
   if (!ctx) {
-    throw new Error("useTickets deve estar dentro de TicketProvider");
+    throw new Error("useTickets deve estar dentro do TicketProvider");
   }
   return ctx;
 }
