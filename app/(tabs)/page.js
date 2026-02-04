@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useTickets } from "../../context/TicketContext";
+import { useTickets } from "../context/TicketContext"; // ✅ CAMINHO CORRETO
 
 export default function HomePage() {
   const { tickets, consumeTicket } = useTickets(); // 🎟️ GLOBAL
@@ -91,25 +91,21 @@ const styles = {
       "radial-gradient(1200px 600px at 20% 0%, #e9edff 0%, #f7f8ff 40%, #eef2ff 100%)",
     fontFamily: "system-ui, -apple-system, Segoe UI, Roboto",
   },
-
   header: {
     display: "flex",
     alignItems: "center",
     marginBottom: 20,
   },
-
   title: {
     fontSize: 32,
     fontWeight: 900,
     margin: 0,
   },
-
   tickets: {
     marginLeft: "auto",
     fontWeight: 800,
     fontSize: 14,
   },
-
   card: {
     background: "#fff",
     borderRadius: 18,
@@ -117,7 +113,6 @@ const styles = {
     boxShadow: "0 18px 40px rgba(15,23,42,0.12)",
     maxWidth: 480,
   },
-
   input: {
     width: "100%",
     padding: 14,
@@ -126,7 +121,6 @@ const styles = {
     marginBottom: 12,
     fontSize: 15,
   },
-
   button: {
     width: "100%",
     padding: 14,
@@ -137,7 +131,6 @@ const styles = {
     fontWeight: 900,
     fontSize: 15,
   },
-
   result: {
     marginTop: 20,
     background: "#fff",
@@ -146,7 +139,6 @@ const styles = {
     boxShadow: "0 10px 22px rgba(15,23,42,0.08)",
     maxWidth: 720,
   },
-
   resultText: {
     fontSize: 14,
     lineHeight: 1.6,
