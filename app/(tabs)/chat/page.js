@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useTickets } from "../context/TicketContext";
 
 const SUGESTOES = [
   "Qual é o meu nicho?",
@@ -9,16 +10,14 @@ const SUGESTOES = [
   "Como viralizar meus vídeos?",
 ];
 
-const FREE_TICKETS = 7;
-const LOGIN_BONUS = 2;
-
 export default function ChatPage() {
+  const { tickets, consumeTicket } = useTickets(); // ✅ GLOBAL
+
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [projects, setProjects] = useState([]);
-  const [tickets, setTickets] = useState(FREE_TICKETS);
 
   const chatIdRef = useRef(null);
   const bottomRef = useRef(null);
@@ -26,18 +25,6 @@ export default function ChatPage() {
   const touchStartX = useRef(0);
 
   if (!chatIdRef.current) chatIdRef.current = Date.now();
-
-  /* ===== INIT TICKETS ===== */
-  useEffect(() => {
-    let stored = localStorage.getItem("nicholens-tickets");
-
-    if (stored === null) {
-      localStorage.setItem("nicholens-tickets", FREE_TICKETS);
-      setTickets(FREE_TICKETS);
-    } else {
-      setTickets(Number(stored));
-    }
-  }, []);
 
   /* ===== LOAD PROJECTS ===== */
   useEffect(() => {
@@ -66,14 +53,6 @@ export default function ChatPage() {
     return () => document.removeEventListener("mousedown", handleClick);
   }, [menuOpen]);
 
-  function consumeTicket() {
-    if (tickets <= 0) return false;
-    const newValue = tickets - 1;
-    setTickets(newValue);
-    localStorage.setItem("nicholens-tickets", newValue);
-    return true;
-  }
-
   function generateProjectTitle(msg) {
     if (!msg) return "Novo projeto";
     return msg.length > 40 ? msg.slice(0, 40) + "…" : msg;
@@ -83,7 +62,7 @@ export default function ChatPage() {
     const msg = text ?? input;
     if (!msg.trim() || loading) return;
 
-    // 🎟️ CHECK TICKET
+    // 🎟️ CONSUME TICKET GLOBAL
     if (!consumeTicket()) return;
 
     setMessages(prev => [...prev, { role: "user", content: msg }]);
