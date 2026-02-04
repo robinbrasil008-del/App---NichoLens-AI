@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useTickets } from "../context/TicketContext";
+import { useTickets } from "../../context/TicketContext";
 
 const SUGESTOES = [
   "Qual é o meu nicho?",
