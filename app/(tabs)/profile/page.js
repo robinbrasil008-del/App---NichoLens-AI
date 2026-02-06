@@ -12,7 +12,7 @@ export default function ProfilePage() {
 
   const USER_KEY = session?.user?.email || "guest";
 
-  const [projects, setProjects] = useState([]);
+  const [chats, setChats] = useState([]);
   const [name, setName] = useState("");
   const [nicho, setNicho] = useState("");
   const [editName, setEditName] = useState(false);
@@ -21,11 +21,11 @@ export default function ProfilePage() {
   useEffect(() => {
     if (typeof window === "undefined" || !USER_KEY) return;
 
-    const storedProjects =
+    const storedChats =
       JSON.parse(
-        localStorage.getItem(`nicholens-projects:${USER_KEY}`)
+        localStorage.getItem(`nicholens-chats:${USER_KEY}`)
       ) || [];
-    setProjects(storedProjects);
+    setChats(storedChats);
 
     const savedName = localStorage.getItem(
       `nicholens-name:${USER_KEY}`
@@ -346,7 +346,7 @@ const styles = {
     marginBottom: 10,
   },
 
-  projectRow: {
+  chatRow: {
     background: "#232a55",
     borderRadius: 14,
     padding: 14,
@@ -355,10 +355,10 @@ const styles = {
     justifyContent: "space-between",
     alignItems: "center",
   },
-  projectTitle: {
+  chatTitle: {
     cursor: "pointer",
   },
-  projectMenu: {
+  chatMenu: {
     display: "flex",
     gap: 8,
   },
