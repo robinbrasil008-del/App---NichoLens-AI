@@ -45,37 +45,40 @@ export default function ProfilePage() {
 
   /* ===== NÃO LOGADO ===== */
   if (!session) {
-    return (
-      <div style={{ ...styles.page, ...styles.center }}>
-        <div style={styles.authCard}>
-          <span style={styles.authText}>Faça o login autenticado com:</span>
-          <div style={styles.provider}>
-            <button style={styles.loginBtn} onClick={() => signIn("google")}>
-  <img
-    src="https://www.google.com/favicon.ico"
-    alt="Google"
-    style={styles.btnIcon}
-  />
-  Login com Google
-</button>
+  return (
+    <div style={{ ...styles.page, ...styles.center }}>
+      <span style={styles.authText}>Faça o login autenticado com:</span>
 
-        <div style={styles.authCard}>
-          <span style={styles.authText}>Faça o registro autenticado com:</span>
-          <div style={styles.provider}>
-            <button style={styles.registerBtn} onClick={() => signIn("google")}>
-  <img
-    src="https://www.google.com/favicon.ico"
-    alt="Google"
-    style={styles.btnIcon}
-  />
-  Registrar-se
-</button>
-          </div>
-        </div>
-      </div>
-    );
-  }
+      <button
+        style={styles.loginBtn}
+        onClick={() => signIn("google")}
+      >
+        <img
+          src="https://www.google.com/favicon.ico"
+          alt="Google"
+          style={{ width: 20, height: 20 }}
+        />
+        Login com Google
+      </button>
 
+      <span style={{ ...styles.authText, marginTop: 24 }}>
+        Faça o registro autenticado com:
+      </span>
+
+      <button
+        style={styles.registerBtn}
+        onClick={() => signIn("google")}
+      >
+        <img
+          src="https://www.google.com/favicon.ico"
+          alt="Google"
+          style={{ width: 20, height: 20 }}
+        />
+        Registrar-se
+      </button>
+    </div>
+  );
+}
   /* ===== LOGADO ===== */
   return (
     <div style={styles.pageScroll}>
