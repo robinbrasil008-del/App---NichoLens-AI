@@ -34,10 +34,11 @@ export default function ChatPage() {
     setProjects(saved);
   }, []);
 
-  /* ===== AUTO SCROLL ===== */
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, loading]);
+  /* ===== AUTO SCROLL (SÓ QUANDO HÁ MENSAGENS) ===== */
+useEffect(() => {
+  if (messages.length === 0) return; // 🚫 impede descida ao abrir a página
+  bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+}, [messages, loading]);
 
   /* ===== CLICK OUTSIDE TO CLOSE MENU ===== */
   useEffect(() => {
