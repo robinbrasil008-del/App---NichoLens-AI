@@ -425,4 +425,29 @@ const styles = {
   fontSize: 14,
   cursor: "pointer",
   },
+  provider: {
+  display: "flex",
+  alignItems: "center",
+  gap: 12,
+  },
+  googleIcon: {
+  width: 22,
+  height: 22,
+  },
+  loginBtn: {
+  width: 220,
+  height: 44,
+  borderRadius: 14,
+  fontWeight: 800,
+  },
+  registerBtn: {
+  width: 220,
+  height: 44,
+  borderRadius: 14,
+  },
+  authText: {
+  fontSize: 13,
+  opacity: 0.7,
+  marginBottom: 6,
+  },
 };
