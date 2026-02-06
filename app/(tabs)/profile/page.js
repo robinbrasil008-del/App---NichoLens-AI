@@ -50,28 +50,26 @@ export default function ProfilePage() {
         <div style={styles.authCard}>
           <span style={styles.authText}>Faça o login autenticado com:</span>
           <div style={styles.provider}>
-            <img
-              src="https://www.google.com/favicon.ico"
-              alt="Google"
-              style={styles.googleIcon}
-            />
             <button style={styles.loginBtn} onClick={() => signIn("google")}>
-              Login
-            </button>
-          </div>
-        </div>
+  <img
+    src="https://www.google.com/favicon.ico"
+    alt="Google"
+    style={styles.btnIcon}
+  />
+  Login com Google
+</button>
 
         <div style={styles.authCard}>
           <span style={styles.authText}>Faça o registro autenticado com:</span>
           <div style={styles.provider}>
-            <img
-              src="https://www.google.com/favicon.ico"
-              alt="Google"
-              style={styles.googleIcon}
-            />
             <button style={styles.registerBtn} onClick={() => signIn("google")}>
-              Registrar-se
-            </button>
+  <img
+    src="https://www.google.com/favicon.ico"
+    alt="Google"
+    style={styles.btnIcon}
+  />
+  Registrar-se
+</button>
           </div>
         </div>
       </div>
