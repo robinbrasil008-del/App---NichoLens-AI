@@ -25,43 +25,29 @@ export default function ProfilePage() {
   if (!session) {
     return (
       <div style={{ ...styles.page, ...styles.center }}>
-        {/* LOGIN */}
         <div style={styles.authBlock}>
-          <span style={styles.authText}>
-            Faça o login autenticado com:
-          </span>
-
+          <span style={styles.authText}>Faça o login autenticado com:</span>
           <div style={styles.provider}>
             <img
               src="https://www.google.com/favicon.ico"
               alt="Google"
               style={styles.googleIcon}
             />
-            <button
-              style={styles.loginBtn}
-              onClick={() => signIn("google")}
-            >
+            <button style={styles.loginBtn} onClick={() => signIn("google")}>
               Login
             </button>
           </div>
         </div>
 
-        {/* REGISTRO */}
         <div style={styles.authBlock}>
-          <span style={styles.authText}>
-            Faça o registro autenticado com:
-          </span>
-
+          <span style={styles.authText}>Faça o registro autenticado com:</span>
           <div style={styles.provider}>
             <img
               src="https://www.google.com/favicon.ico"
               alt="Google"
               style={styles.googleIcon}
             />
-            <button
-              style={styles.registerBtn}
-              onClick={() => signIn("google")}
-            >
+            <button style={styles.registerBtn} onClick={() => signIn("google")}>
               Registrar-se
             </button>
           </div>
@@ -73,27 +59,43 @@ export default function ProfilePage() {
   /* ===== LOGADO ===== */
   return (
     <div style={styles.pageScroll}>
-      <h2 style={styles.title}>Minha Conta</h2>
-
-      <div style={styles.card}>
-        <p><b>Nome:</b> {session.user?.name}</p>
-        <p><b>E-mail:</b> {session.user?.email}</p>
-        <p><b>Tickets:</b> 🎟️ {tickets}</p>
-        <p><b>Nicho:</b> <i>(opcional)</i></p>
+      {/* HEADER PERFIL */}
+      <div style={styles.profileHeader}>
+        <div style={styles.avatar}>
+          {session.user?.name?.charAt(0) || "U"}
+        </div>
+        <div>
+          <div style={styles.name}>{session.user?.name}</div>
+          <div style={styles.email}>{session.user?.email}</div>
+        </div>
       </div>
 
-      <h3 style={styles.subtitle}>📁 Projetos criados</h3>
+      {/* INFO CARD */}
+      <div style={styles.infoCard}>
+        <div style={styles.infoRow}>
+          <span>🎟️ Tickets</span>
+          <b>{tickets}</b>
+        </div>
+        <div style={styles.infoRow}>
+          <span>🎯 Nicho</span>
+          <i style={{ opacity: 0.6 }}>(opcional)</i>
+        </div>
+      </div>
+
+      {/* PROJETOS */}
+      <div style={styles.sectionTitle}>📁 Projetos criados</div>
 
       {projects.length === 0 ? (
-        <p style={styles.text}>Nenhum projeto criado ainda.</p>
+        <div style={styles.empty}>Nenhum projeto criado ainda</div>
       ) : (
         projects.map((p) => (
-          <div key={p.id} style={styles.project}>
+          <div key={p.id} style={styles.menuItem}>
             📌 {p.title}
           </div>
         ))
       )}
 
+      {/* SAIR */}
       <button style={styles.logout} onClick={() => signOut()}>
         Sair da conta
       </button>
@@ -105,7 +107,7 @@ export default function ProfilePage() {
 
 const styles = {
   page: {
-    height: "100vh",
+    height: "100%",
     padding: 20,
     paddingBottom: 90,
     display: "flex",
@@ -115,11 +117,10 @@ const styles = {
     color: "#fff",
     fontFamily:
       '"Plus Jakarta Sans", system-ui, -apple-system, Segoe UI, Roboto',
-    overflow: "hidden",
   },
 
   pageScroll: {
-    height: "100vh",
+    height: "100%",
     padding: 20,
     paddingBottom: 90,
     overflowY: "auto",
@@ -136,29 +137,26 @@ const styles = {
     gap: 26,
   },
 
+  /* AUTH */
   authBlock: {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
     gap: 8,
   },
-
   authText: {
     fontSize: 12,
     opacity: 0.85,
   },
-
   provider: {
     display: "flex",
     alignItems: "center",
     gap: 10,
   },
-
   googleIcon: {
     width: 18,
     height: 18,
   },
-
   loginBtn: {
     width: 220,
     padding: "12px",
@@ -168,9 +166,7 @@ const styles = {
     color: "#0b1220",
     fontWeight: 700,
     fontSize: 14,
-    cursor: "pointer",
   },
-
   registerBtn: {
     width: 220,
     padding: "12px",
@@ -180,46 +176,75 @@ const styles = {
     color: "#fff",
     fontWeight: 700,
     fontSize: 14,
-    cursor: "pointer",
   },
 
-  title: {
-    fontSize: 28,
-    fontWeight: 900,
+  /* PERFIL */
+  profileHeader: {
+    display: "flex",
+    alignItems: "center",
+    gap: 14,
     marginBottom: 20,
   },
-
-  subtitle: {
-    marginTop: 30,
-    marginBottom: 10,
+  avatar: {
+    width: 56,
+    height: 56,
+    borderRadius: "50%",
+    background: "linear-gradient(135deg,#6d5dfc,#8b5cf6)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontSize: 24,
+    fontWeight: 900,
+  },
+  name: {
+    fontSize: 18,
+    fontWeight: 800,
+  },
+  email: {
+    fontSize: 13,
+    opacity: 0.7,
   },
 
-  card: {
+  infoCard: {
     background: "#1c2142",
     borderRadius: 16,
-    padding: 16,
-    marginBottom: 20,
+    padding: 14,
+    marginBottom: 24,
+  },
+  infoRow: {
+    display: "flex",
+    justifyContent: "space-between",
+    padding: "6px 0",
+    fontSize: 14,
   },
 
-  project: {
-    background: "#232a55",
-    borderRadius: 12,
-    padding: 12,
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: 800,
     marginBottom: 10,
   },
 
-  text: {
-    opacity: 0.9,
+  menuItem: {
+    background: "#232a55",
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 10,
+    fontSize: 14,
+  },
+
+  empty: {
+    opacity: 0.6,
+    fontSize: 14,
+    marginBottom: 20,
   },
 
   logout: {
     marginTop: 30,
-    padding: "10px 14px",
-    borderRadius: 12,
+    padding: "12px",
+    borderRadius: 14,
     border: "none",
     background: "#2a2f55",
     color: "#fff",
     fontWeight: 700,
-    cursor: "pointer",
   },
 };
