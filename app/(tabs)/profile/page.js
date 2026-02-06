@@ -7,13 +7,14 @@ import { useTickets } from "../../context/TicketContext";
 export default function ProfilePage() {
   const { data: session, status } = useSession();
   const { tickets } = useTickets();
-
   const [projects, setProjects] = useState([]);
 
   useEffect(() => {
-    const stored =
-      JSON.parse(localStorage.getItem("nicholens-projects")) || [];
-    setProjects(stored);
+    if (typeof window !== "undefined") {
+      const stored =
+        JSON.parse(localStorage.getItem("nicholens-projects")) || [];
+      setProjects(stored);
+    }
   }, []);
 
   if (status === "loading") {
@@ -24,19 +25,47 @@ export default function ProfilePage() {
   if (!session) {
     return (
       <div style={{ ...styles.page, ...styles.center }}>
-        <button
-          style={styles.mainBtn}
-          onClick={() => signIn("google")}
-        >
-          Entrar
-        </button>
+        {/* LOGIN */}
+        <div style={styles.authBlock}>
+          <span style={styles.authText}>
+            Faça o login autenticado com:
+          </span>
 
-        <button
-          style={styles.secondaryBtn}
-          onClick={() => signIn("google")}
-        >
-          Registrar-se
-        </button>
+          <div style={styles.provider}>
+            <img
+              src="https://www.google.com/favicon.ico"
+              alt="Google"
+              style={styles.googleIcon}
+            />
+            <button
+              style={styles.loginBtn}
+              onClick={() => signIn("google")}
+            >
+              Login
+            </button>
+          </div>
+        </div>
+
+        {/* REGISTRO */}
+        <div style={styles.authBlock}>
+          <span style={styles.authText}>
+            Faça o registro autenticado com:
+          </span>
+
+          <div style={styles.provider}>
+            <img
+              src="https://www.google.com/favicon.ico"
+              alt="Google"
+              style={styles.googleIcon}
+            />
+            <button
+              style={styles.registerBtn}
+              onClick={() => signIn("google")}
+            >
+              Registrar-se
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -91,30 +120,53 @@ const styles = {
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
-    gap: 16,
+    gap: 26,
   },
 
-  mainBtn: {
+  authBlock: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: 8,
+  },
+
+  authText: {
+    fontSize: 12,
+    opacity: 0.85,
+  },
+
+  provider: {
+    display: "flex",
+    alignItems: "center",
+    gap: 10,
+  },
+
+  googleIcon: {
+    width: 18,
+    height: 18,
+  },
+
+  loginBtn: {
     width: 220,
-    padding: "14px 16px",
+    padding: "12px",
     borderRadius: 14,
-    border: "none",
-    background: "linear-gradient(90deg,#6d5dfc,#8b5cf6)",
-    color: "#fff",
-    fontWeight: 900,
-    fontSize: 16,
+    border: "1px solid #4ade80",
+    background: "linear-gradient(90deg,#4ade80,#22c55e)",
+    color: "#0b1220",
+    fontWeight: 700,
+    fontSize: 14,
     cursor: "pointer",
   },
 
-  secondaryBtn: {
+  registerBtn: {
     width: 220,
-    padding: "12px 16px",
+    padding: "12px",
     borderRadius: 14,
-    border: "1px solid #6d5dfc",
+    border: "1px solid #4ade80",
     background: "transparent",
     color: "#fff",
     fontWeight: 700,
-    fontSize: 15,
+    fontSize: 14,
     cursor: "pointer",
   },
 
@@ -145,7 +197,6 @@ const styles = {
 
   text: {
     opacity: 0.9,
-    marginBottom: 14,
   },
 
   logout: {
