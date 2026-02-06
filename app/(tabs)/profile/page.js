@@ -46,8 +46,8 @@ export default function ProfilePage() {
   /* ===== NÃO LOGADO ===== */
   if (!session) {
   return (
-    <div style={{ ...styles.page, ...styles.center }}>
-  <div style={{ width: "100%", maxWidth: 320 }}>
+    <div style={styles.page}>
+  <div style={styles.profileContent}>
 
     <span style={styles.authText}>
       Faça o login autenticado com:
@@ -251,18 +251,11 @@ export default function ProfilePage() {
 
 const styles = {
   page: {
-  minHeight: "100vh",
-  padding: 20,
+  height: "100%",
+  display: "flex",
+  flexDirection: "column",
   background: "linear-gradient(180deg,#0f1225,#0b0f24)",
   color: "#fff",
-},
-  pageScroll: {
-    height: "100vh",
-    padding: 20,
-    paddingBottom: 90,
-    overflowY: "auto",
-    background: "linear-gradient(180deg,#0f1225,#0b0f24)",
-    color: "#fff",
   },
   center: {
   display: "flex",
