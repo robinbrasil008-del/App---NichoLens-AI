@@ -6,29 +6,34 @@ export default function TabsLayout({ children }) {
   return (
     <div
       style={{
-        minHeight: "100svh",
+        height: "100dvh", // 🔥 viewport real do mobile
         display: "flex",
         flexDirection: "column",
-        background: "#0f1630",
+        overflow: "hidden",
+        background: "#0f1225",
       }}
     >
-      {/* CONTEÚDO */}
-      <div style={{ flex: 1, overflowY: "auto" }}>
+      {/* CONTEÚDO COM SCROLL */}
+      <div
+        style={{
+          flex: 1,
+          overflowY: "auto",
+          WebkitOverflowScrolling: "touch",
+        }}
+      >
         {children}
       </div>
 
-      {/* NAVBAR */}
+      {/* MENU FIXO */}
       <nav
         style={{
-          position: "sticky",
-          bottom: 0,
           height: 60,
           background: "#0f1630",
           borderTop: "1px solid #1f2a4a",
           display: "flex",
           justifyContent: "space-around",
           alignItems: "center",
-          zIndex: 100,
+          flexShrink: 0,
         }}
       >
         <TabLink href="/" label="Início" icon="🏠" />
