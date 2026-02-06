@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useTickets } from "../../context/TicketContext";
+import { useSession } from "next-auth/react";
 
 const SUGESTOES = [
   "Qual é o meu nicho?",
@@ -12,6 +13,9 @@ const SUGESTOES = [
 
 export default function ChatPage() {
   const { tickets, consumeTicket } = useTickets();
+  const { data: session } = useSession();
+
+  const USER_KEY = session?.user?.email || "guest";
 
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
@@ -20,42 +24,49 @@ export default function ChatPage() {
   const [projects, setProjects] = useState([]);
 
   const chatIdRef = useRef(null);
-  const bottomRef = useRef(null); // mantido
-  const chatRef = useRef(null);   // ✅ NOVO (não interfere)
+  const bottomRef = useRef(null);
+  const chatRef = useRef(null);
   const menuRef = useRef(null);
   const touchStartX = useRef(0);
 
   if (!chatIdRef.current) chatIdRef.current = Date.now();
 
-  /* ===== LOAD PROJECTS + ABRIR PROJETO VINDO DO PERFIL ===== */
+  /* ===== LOAD PROJECTS + ABRIR PROJETO DO PERFIL ===== */
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined" || !USER_KEY) return;
 
     const saved =
-      JSON.parse(localStorage.getItem("nicholens-projects")) || [];
+      JSON.parse(
+        localStorage.getItem(`nicholens-projects:${USER_KEY}`)
+      ) || [];
     setProjects(saved);
 
-    // ✅ se o Perfil mandou abrir um projeto específico
-    const openId = localStorage.getItem("nicholens-open-project");
+    const openId = localStorage.getItem(
+      `nicholens-open-project:${USER_KEY}`
+    );
+
     if (openId) {
-      const project = saved.find((p) => String(p.id) === String(openId));
+      const project = saved.find(
+        (p) => String(p.id) === String(openId)
+      );
       if (project) {
         chatIdRef.current = project.id;
         setMessages(project.messages || []);
       }
-      localStorage.removeItem("nicholens-open-project");
+      localStorage.removeItem(
+        `nicholens-open-project:${USER_KEY}`
+      );
     }
-  }, []);
+  }, [USER_KEY]);
 
-  /* ===== AUTO SCROLL (SOMENTE DENTRO DO CHAT) ===== */
+  /* ===== AUTO SCROLL ===== */
   useEffect(() => {
     if (!chatRef.current) return;
     if (messages.length === 0) return;
-
     chatRef.current.scrollTop = chatRef.current.scrollHeight;
   }, [messages, loading]);
 
-  /* ===== CLICK OUTSIDE TO CLOSE MENU ===== */
+  /* ===== CLICK OUTSIDE ===== */
   useEffect(() => {
     function handleClick(e) {
       if (menuOpen && menuRef.current && !menuRef.current.contains(e.target)) {
@@ -113,7 +124,7 @@ export default function ChatPage() {
 
         setProjects(newProjects);
         localStorage.setItem(
-          "nicholens-projects",
+          `nicholens-projects:${USER_KEY}`,
           JSON.stringify(newProjects)
         );
 
@@ -149,7 +160,10 @@ export default function ChatPage() {
       p.id === id ? { ...p, title: name } : p
     );
     setProjects(updated);
-    localStorage.setItem("nicholens-projects", JSON.stringify(updated));
+    localStorage.setItem(
+      `nicholens-projects:${USER_KEY}`,
+      JSON.stringify(updated)
+    );
   }
 
   function deleteProject(id) {
@@ -157,7 +171,10 @@ export default function ChatPage() {
 
     const updated = projects.filter((p) => p.id !== id);
     setProjects(updated);
-    localStorage.setItem("nicholens-projects", JSON.stringify(updated));
+    localStorage.setItem(
+      `nicholens-projects:${USER_KEY}`,
+      JSON.stringify(updated)
+    );
 
     if (chatIdRef.current === id) newChat();
   }
@@ -202,16 +219,10 @@ export default function ChatPage() {
               </button>
 
               <div style={styles.projectActions}>
-                <button
-                  onClick={() => renameProject(p.id)}
-                  style={styles.iconBtn}
-                >
+                <button onClick={() => renameProject(p.id)} style={styles.iconBtn}>
                   ✏️
                 </button>
-                <button
-                  onClick={() => deleteProject(p.id)}
-                  style={styles.iconBtn}
-                >
+                <button onClick={() => deleteProject(p.id)} style={styles.iconBtn}>
                   🗑️
                 </button>
               </div>
@@ -287,9 +298,9 @@ export default function ChatPage() {
   );
 }
 
-/* ===== STYLES (INTACTOS) ===== */
+/* ===== STYLES ===== */
+/* 🔒 100% INTACTOS */
 
-const styles = {
   page: {
     height: "100%",
     display: "flex",
