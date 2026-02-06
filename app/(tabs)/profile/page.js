@@ -47,7 +47,7 @@ export default function ProfilePage() {
   if (!session) {
     return (
       <div style={{ ...styles.page, ...styles.center }}>
-        <div style={styles.authBlock}>
+        <div style={styles.authCard}>
           <span style={styles.authText}>Faça o login autenticado com:</span>
           <div style={styles.provider}>
             <img
@@ -61,7 +61,7 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        <div style={styles.authBlock}>
+        <div style={styles.authCard}>
           <span style={styles.authText}>Faça o registro autenticado com:</span>
           <div style={styles.provider}>
             <img
@@ -389,5 +389,40 @@ const styles = {
     background: "#2a2f55",
     color: "#fff",
     fontWeight: 700,
+  },
+
+  authCard: {
+  background: "#1c2142",
+  borderRadius: 18,
+  padding: 20,
+  width: "100%",
+  maxWidth: 320,
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  gap: 14,
+  boxShadow: "0 20px 40px rgba(0,0,0,0.35)",
+  },
+  loginBtn: {
+  width: 220,
+  padding: "12px",
+  borderRadius: 14,
+  border: "none",
+  background: "linear-gradient(90deg,#4ade80,#22c55e)",
+  color: "#0b1220",
+  fontWeight: 800,
+  fontSize: 14,
+  cursor: "pointer",
+  },
+  registerBtn: {
+  width: 220,
+  padding: "12px",
+  borderRadius: 14,
+  border: "1px solid #4ade80",
+  background: "transparent",
+  color: "#fff",
+  fontWeight: 800,
+  fontSize: 14,
+  cursor: "pointer",
   },
 };
