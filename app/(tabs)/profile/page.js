@@ -105,9 +105,10 @@ export default function ProfilePage() {
 
 const styles = {
   page: {
-    minHeight: "100vh",
+    minHeight: "100svh",
     padding: 20,
     paddingBottom: 90,
+    overflow: "hidden",
     background:
       "linear-gradient(180deg,#0f1225 0%,#151a3a 40%,#0b0f24 100%)",
     color: "#fff",
