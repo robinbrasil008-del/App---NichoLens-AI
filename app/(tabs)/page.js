@@ -63,9 +63,17 @@ export default function HomePage() {
               Sair
             </button>
           ) : (
-            <button onClick={() => signIn("google")} style={styles.authBtn}>
-              Entrar
-            </button>
+            <button
+  onClick={() =>
+    signIn("google", {
+      redirect: false,
+      callbackUrl: "/",
+    })
+  }
+  style={styles.authBtn}
+>
+  Entrar
+</button>
           )}
         </div>
       </header>
