@@ -10,6 +10,8 @@ export default function ProfilePage() {
   const { tickets } = useTickets();
   const router = useRouter();
 
+  const USER_KEY = session?.user?.email || "guest";
+
   const [projects, setProjects] = useState([]);
   const [name, setName] = useState("");
   const [nicho, setNicho] = useState("");
@@ -17,18 +19,27 @@ export default function ProfilePage() {
   const [editNicho, setEditNicho] = useState(false);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined" || !USER_KEY) return;
 
     const storedProjects =
-      JSON.parse(localStorage.getItem("nicholens-projects")) || [];
+      JSON.parse(
+        localStorage.getItem(`nicholens-projects:${USER_KEY}`)
+      ) || [];
     setProjects(storedProjects);
 
-    const savedName = localStorage.getItem("nicholens-name");
-    const savedNicho = localStorage.getItem("nicholens-nicho");
+    const savedName = localStorage.getItem(
+      `nicholens-name:${USER_KEY}`
+    );
+    const savedNicho = localStorage.getItem(
+      `nicholens-nicho:${USER_KEY}`
+    );
 
     if (savedName) setName(savedName);
+    else setName(session?.user?.name || "");
+
     if (savedNicho) setNicho(savedNicho);
-  }, []);
+    else setNicho("");
+  }, [USER_KEY, session]);
 
   if (status === "loading") return <div style={styles.page} />;
 
@@ -39,7 +50,11 @@ export default function ProfilePage() {
         <div style={styles.authBlock}>
           <span style={styles.authText}>Faça o login autenticado com:</span>
           <div style={styles.provider}>
-            <img src="https://www.google.com/favicon.ico" alt="Google" style={styles.googleIcon} />
+            <img
+              src="https://www.google.com/favicon.ico"
+              alt="Google"
+              style={styles.googleIcon}
+            />
             <button style={styles.loginBtn} onClick={() => signIn("google")}>
               Login
             </button>
@@ -49,7 +64,11 @@ export default function ProfilePage() {
         <div style={styles.authBlock}>
           <span style={styles.authText}>Faça o registro autenticado com:</span>
           <div style={styles.provider}>
-            <img src="https://www.google.com/favicon.ico" alt="Google" style={styles.googleIcon} />
+            <img
+              src="https://www.google.com/favicon.ico"
+              alt="Google"
+              style={styles.googleIcon}
+            />
             <button style={styles.registerBtn} onClick={() => signIn("google")}>
               Registrar-se
             </button>
@@ -65,7 +84,11 @@ export default function ProfilePage() {
       {/* HEADER PERFIL */}
       <div style={styles.profileHeader}>
         {session.user?.image ? (
-          <img src={session.user.image} alt="Avatar" style={styles.avatarImg} />
+          <img
+            src={session.user.image}
+            alt="Avatar"
+            style={styles.avatarImg}
+          />
         ) : (
           <div style={styles.avatar}>
             {(name || session.user?.name || "U").charAt(0)}
@@ -78,7 +101,10 @@ export default function ProfilePage() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               onBlur={() => {
-                localStorage.setItem("nicholens-name", name);
+                localStorage.setItem(
+                  `nicholens-name:${USER_KEY}`,
+                  name
+                );
                 setEditName(false);
               }}
               autoFocus
@@ -94,7 +120,9 @@ export default function ProfilePage() {
 
           <button
             style={styles.linkBtn}
-            onClick={() => window.open("https://myaccount.google.com", "_blank")}
+            onClick={() =>
+              window.open("https://myaccount.google.com", "_blank")
+            }
           >
             Alterar foto
           </button>
@@ -116,7 +144,10 @@ export default function ProfilePage() {
               value={nicho}
               onChange={(e) => setNicho(e.target.value)}
               onBlur={() => {
-                localStorage.setItem("nicholens-nicho", nicho);
+                localStorage.setItem(
+                  `nicholens-nicho:${USER_KEY}`,
+                  nicho
+                );
                 setEditNicho(false);
               }}
               autoFocus
@@ -127,7 +158,8 @@ export default function ProfilePage() {
               style={styles.nichoView}
               onClick={() => setEditNicho(true)}
             >
-              {nicho || "(opcional)"} <span style={styles.pencil}>✏️</span>
+              {nicho || "(opcional)"}{" "}
+              <span style={styles.pencil}>✏️</span>
             </span>
           )}
         </div>
@@ -144,7 +176,10 @@ export default function ProfilePage() {
             <div
               style={styles.projectTitle}
               onClick={() => {
-                localStorage.setItem("nicholens-open-project", p.id);
+                localStorage.setItem(
+                  `nicholens-open-project:${USER_KEY}`,
+                  p.id
+                );
                 router.push("/chat");
               }}
             >
@@ -154,14 +189,20 @@ export default function ProfilePage() {
             <div style={styles.projectMenu}>
               <button
                 onClick={() => {
-                  const name = prompt("Novo nome do projeto:", p.title);
-                  if (!name) return;
+                  const newName = prompt(
+                    "Novo nome do projeto:",
+                    p.title
+                  );
+                  if (!newName) return;
+
                   const updated = projects.map((x) =>
-                    x.id === p.id ? { ...x, title: name } : x
+                    x.id === p.id
+                      ? { ...x, title: newName }
+                      : x
                   );
                   setProjects(updated);
                   localStorage.setItem(
-                    "nicholens-projects",
+                    `nicholens-projects:${USER_KEY}`,
                     JSON.stringify(updated)
                   );
                 }}
@@ -172,10 +213,13 @@ export default function ProfilePage() {
               <button
                 onClick={() => {
                   if (!confirm("Excluir este projeto?")) return;
-                  const updated = projects.filter((x) => x.id !== p.id);
+
+                  const updated = projects.filter(
+                    (x) => x.id !== p.id
+                  );
                   setProjects(updated);
                   localStorage.setItem(
-                    "nicholens-projects",
+                    `nicholens-projects:${USER_KEY}`,
                     JSON.stringify(updated)
                   );
                 }}
@@ -196,6 +240,7 @@ export default function ProfilePage() {
 }
 
 /* ===== STYLES ===== */
+/* ⚠️ STYLES 100% INTACTOS — IGUAIS AO SEU */
 
 const styles = {
   page: {
