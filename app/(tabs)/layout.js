@@ -4,15 +4,24 @@ import Link from "next/link";
 
 export default function TabsLayout({ children }) {
   return (
-    <div style={{ minHeight: "100vh", paddingBottom: 70 }}>
-      {children}
+    <div
+      style={{
+        minHeight: "100svh",
+        display: "flex",
+        flexDirection: "column",
+        background: "#0f1630",
+      }}
+    >
+      {/* CONTEÚDO */}
+      <div style={{ flex: 1, overflowY: "auto" }}>
+        {children}
+      </div>
 
+      {/* NAVBAR */}
       <nav
         style={{
-          position: "fixed",
+          position: "sticky",
           bottom: 0,
-          left: 0,
-          right: 0,
           height: 60,
           background: "#0f1630",
           borderTop: "1px solid #1f2a4a",
