@@ -466,5 +466,13 @@ const styles = {
   width: 20,
   height: 20,
   },
-  
+  profileContent: {
+  flex: 1,
+  minHeight: 0,
+  display: "flex",
+  flexDirection: "column",
+  justifyContent: "center",
+  alignItems: "center",
+  padding: 20,
+  },
 };
