@@ -13,55 +13,53 @@ const SUGESTOES = [
 
 export default function ChatPage() {
   const { tickets, consumeTicket } = useTickets();
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
 
-  // ✅ separa dados por conta Google
+  // 🔐 separa dados por conta Google
   const USER_KEY = session?.user?.email || "guest";
 
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [projects, setProjects] = useState([]);
+  const [chats, setChats] = useState([]);
 
   const chatIdRef = useRef(null);
-  const bottomRef = useRef(null); // mantido
-  const chatRef = useRef(null); // ✅ NOVO (não interfere)
+  const chatRef = useRef(null);
   const menuRef = useRef(null);
   const touchStartX = useRef(0);
 
   if (!chatIdRef.current) chatIdRef.current = Date.now();
 
-  /* ===== LOAD PROJECTS + ABRIR PROJETO VINDO DO PERFIL ===== */
+  /* ===== LOAD CHATS + ABRIR CHAT VINDO DO PERFIL ===== */
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (!USER_KEY) return;
+    if (typeof window === "undefined" || !USER_KEY) return;
 
     const saved =
-      JSON.parse(localStorage.getItem(`nicholens-projects:${USER_KEY}`)) || [];
-    setProjects(saved);
+      JSON.parse(localStorage.getItem(`nicholens-chats:${USER_KEY}`)) || [];
+    setChats(saved);
 
-    // ✅ se o Perfil mandou abrir um projeto específico
-    const openId = localStorage.getItem(`nicholens-open-project:${USER_KEY}`);
+    const openId = localStorage.getItem(
+      `nicholens-open-chat:${USER_KEY}`
+    );
+
     if (openId) {
-      const project = saved.find((p) => String(p.id) === String(openId));
-      if (project) {
-        chatIdRef.current = project.id;
-        setMessages(project.messages || []);
+      const chat = saved.find((c) => String(c.id) === String(openId));
+      if (chat) {
+        chatIdRef.current = chat.id;
+        setMessages(chat.messages || []);
       }
-      localStorage.removeItem(`nicholens-open-project:${USER_KEY}`);
+      localStorage.removeItem(`nicholens-open-chat:${USER_KEY}`);
     }
   }, [USER_KEY]);
 
-  /* ===== AUTO SCROLL (SOMENTE DENTRO DO CHAT) ===== */
+  /* ===== AUTO SCROLL (SÓ NO CHAT) ===== */
   useEffect(() => {
     if (!chatRef.current) return;
-    if (messages.length === 0) return;
-
     chatRef.current.scrollTop = chatRef.current.scrollHeight;
   }, [messages, loading]);
 
-  /* ===== CLICK OUTSIDE TO CLOSE MENU ===== */
+  /* ===== CLICK FORA FECHA MENU ===== */
   useEffect(() => {
     function handleClick(e) {
       if (menuOpen && menuRef.current && !menuRef.current.contains(e.target)) {
@@ -72,8 +70,8 @@ export default function ChatPage() {
     return () => document.removeEventListener("mousedown", handleClick);
   }, [menuOpen]);
 
-  function generateProjectTitle(msg) {
-    if (!msg) return "Novo projeto";
+  function generateChatTitle(msg) {
+    if (!msg) return "Novo chat";
     return msg.length > 40 ? msg.slice(0, 40) + "…" : msg;
   }
 
@@ -102,24 +100,23 @@ export default function ChatPage() {
 
       setMessages((prev) => {
         const updated = [...prev, aiMsg];
-
         const firstUser = updated.find((m) => m.role === "user")?.content;
 
-        const project = {
+        const chat = {
           id: chatIdRef.current,
-          title: generateProjectTitle(firstUser),
+          title: generateChatTitle(firstUser),
           messages: updated,
         };
 
-        const newProjects = [
-          project,
-          ...projects.filter((p) => p.id !== project.id),
+        const newChats = [
+          chat,
+          ...chats.filter((c) => c.id !== chat.id),
         ];
 
-        setProjects(newProjects);
+        setChats(newChats);
         localStorage.setItem(
-          `nicholens-projects:${USER_KEY}`,
-          JSON.stringify(newProjects)
+          `nicholens-chats:${USER_KEY}`,
+          JSON.stringify(newChats)
         );
 
         return updated;
@@ -140,27 +137,35 @@ export default function ChatPage() {
     setMenuOpen(false);
   }
 
-  function loadProject(p) {
-    chatIdRef.current = p.id;
-    setMessages(p.messages || []);
+  function loadChat(chat) {
+    chatIdRef.current = chat.id;
+    setMessages(chat.messages || []);
     setMenuOpen(false);
   }
 
-  function renameProject(id) {
-    const name = prompt("Novo nome do projeto:");
+  function renameChat(id) {
+    const name = prompt("Novo nome do chat:");
     if (!name) return;
 
-    const updated = projects.map((p) => (p.id === id ? { ...p, title: name } : p));
-    setProjects(updated);
-    localStorage.setItem(`nicholens-projects:${USER_KEY}`, JSON.stringify(updated));
+    const updated = chats.map((c) =>
+      c.id === id ? { ...c, title: name } : c
+    );
+    setChats(updated);
+    localStorage.setItem(
+      `nicholens-chats:${USER_KEY}`,
+      JSON.stringify(updated)
+    );
   }
 
-  function deleteProject(id) {
-    if (!confirm("Deseja excluir este projeto?")) return;
+  function deleteChat(id) {
+    if (!confirm("Deseja excluir este chat?")) return;
 
-    const updated = projects.filter((p) => p.id !== id);
-    setProjects(updated);
-    localStorage.setItem(`nicholens-projects:${USER_KEY}`, JSON.stringify(updated));
+    const updated = chats.filter((c) => c.id !== id);
+    setChats(updated);
+    localStorage.setItem(
+      `nicholens-chats:${USER_KEY}`,
+      JSON.stringify(updated)
+    );
 
     if (chatIdRef.current === id) newChat();
   }
@@ -195,17 +200,26 @@ export default function ChatPage() {
             <div style={styles.menuEmpty}>Nenhum chat ainda</div>
           )}
 
-{chats.map((p) => (
-            <div key={p.id} style={styles.chatItem}>
-              <button style={styles.chatBtn} onClick={() => loadChatp)}>
-                📌 {p.title}
+          {chats.map((c) => (
+            <div key={c.id} style={styles.projectItem}>
+              <button
+                style={styles.projectBtn}
+                onClick={() => loadChat(c)}
+              >
+                📌 {c.title}
               </button>
 
-              <div style={styles.chatActions}>
-                <button onClick={() => renameChat(p.id)} style={styles.iconBtn}>
+              <div style={styles.projectActions}>
+                <button
+                  onClick={() => renameChat(c.id)}
+                  style={styles.iconBtn}
+                >
                   ✏️
                 </button>
-                <button onClick={() => deleteChat(p.id)} style={styles.iconBtn}>
+                <button
+                  onClick={() => deleteChat(c.id)}
+                  style={styles.iconBtn}
+                >
                   🗑️
                 </button>
               </div>
@@ -246,14 +260,15 @@ export default function ChatPage() {
                 background: m.role === "user" ? "#6d5dfc" : "#2a2f45",
               }}
             >
-              {String(m.content).split("\n").map((l, j) => (
-                <div key={j}>{l}</div>
-              ))}
+              {String(m.content)
+                .split("\n")
+                .map((l, j) => (
+                  <div key={j}>{l}</div>
+                ))}
             </div>
           ))}
 
           {loading && <div style={styles.bubble}>Digitando…</div>}
-          <div ref={bottomRef} />
         </div>
       </div>
 
@@ -262,12 +277,18 @@ export default function ChatPage() {
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder={tickets > 0 ? "Digite sua mensagem..." : "Tickets esgotados"}
+          placeholder={
+            tickets > 0 ? "Digite sua mensagem..." : "Tickets esgotados"
+          }
           disabled={tickets <= 0}
           style={styles.input}
           onKeyDown={(e) => e.key === "Enter" && sendMessage()}
         />
-        <button onClick={() => sendMessage()} style={styles.send} disabled={tickets <= 0}>
+        <button
+          onClick={() => sendMessage()}
+          style={styles.send}
+          disabled={tickets <= 0}
+        >
           Enviar
         </button>
       </div>
@@ -275,7 +296,7 @@ export default function ChatPage() {
   );
 }
 
-/* ===== STYLES (INTACTOS) ===== */
+/* ===== STYLES — INTACTOS ===== */
 
 const styles = {
   page: {
@@ -376,7 +397,6 @@ const styles = {
     color: "#fff",
     cursor: "pointer",
   },
-
   menu: {
     position: "absolute",
     top: 56,
@@ -388,7 +408,6 @@ const styles = {
     zIndex: 50,
     boxShadow: "0 20px 40px rgba(0,0,0,0.45)",
   },
-
   menuTitle: {
     fontSize: 12,
     opacity: 0.6,
@@ -396,7 +415,6 @@ const styles = {
     textTransform: "uppercase",
     letterSpacing: 0.6,
   },
-
   menuItem: {
     width: "100%",
     padding: "10px 12px",
@@ -409,7 +427,6 @@ const styles = {
     fontWeight: 600,
     marginBottom: 8,
   },
-
   projectItem: {
     display: "flex",
     alignItems: "center",
@@ -419,7 +436,6 @@ const styles = {
     padding: "8px 10px",
     marginBottom: 6,
   },
-
   projectBtn: {
     background: "none",
     border: "none",
@@ -432,12 +448,10 @@ const styles = {
     overflow: "hidden",
     textOverflow: "ellipsis",
   },
-
   projectActions: {
     display: "flex",
     gap: 6,
   },
-
   iconBtn: {
     background: "#232a55",
     border: "none",
@@ -447,7 +461,6 @@ const styles = {
     padding: "4px 6px",
     fontSize: 12,
   },
-
   menuEmpty: {
     opacity: 0.5,
     fontSize: 13,
