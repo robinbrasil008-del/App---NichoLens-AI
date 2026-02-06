@@ -257,6 +257,14 @@ const styles = {
   background: "linear-gradient(180deg,#0f1225,#0b0f24)",
   color: "#fff",
   },
+  pageScroll: {
+  height: "100%",
+  overflowY: "auto",
+  padding: 20,
+  paddingBottom: 110, // 🔴 MUITO IMPORTANTE (menu inferior)
+  background: "linear-gradient(180deg,#0f1225,#0b0f24)",
+  color: "#fff",
+  },
   center: {
   display: "flex",
   flexDirection: "column",
