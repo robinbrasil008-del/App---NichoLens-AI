@@ -8,9 +8,13 @@ export default function ProfilePage() {
   const { data: session, status } = useSession();
   const { tickets } = useTickets();
   const [projects, setProjects] = useState([]);
+  const [vh, setVh] = useState(null);
 
+  // 🔒 trava altura real da tela (ANTI PULO)
   useEffect(() => {
     if (typeof window !== "undefined") {
+      setVh(window.innerHeight);
+
       const stored =
         JSON.parse(localStorage.getItem("nicholens-projects")) || [];
       setProjects(stored);
@@ -18,13 +22,27 @@ export default function ProfilePage() {
   }, []);
 
   if (status === "loading") {
-    return <div style={styles.page} />;
+    return (
+      <div
+        style={{
+          ...styles.page,
+          height: vh ? `${vh}px` : "100vh",
+        }}
+      />
+    );
   }
 
   /* ===== NÃO LOGADO ===== */
   if (!session) {
     return (
-      <div style={{ ...styles.page, ...styles.center }}>
+      <div
+        style={{
+          ...styles.page,
+          ...styles.center,
+          height: vh ? `${vh}px` : "100vh",
+          overflow: "hidden",
+        }}
+      >
         {/* LOGIN */}
         <div style={styles.authBlock}>
           <span style={styles.authText}>
@@ -72,7 +90,13 @@ export default function ProfilePage() {
 
   /* ===== LOGADO ===== */
   return (
-    <div style={styles.page}>
+    <div
+      style={{
+        ...styles.page,
+        height: vh ? `${vh}px` : "100vh",
+        overflowY: "auto",
+      }}
+    >
       <h2 style={styles.title}>Minha Conta</h2>
 
       <div style={styles.card}>
@@ -105,10 +129,8 @@ export default function ProfilePage() {
 
 const styles = {
   page: {
-    minHeight: "100svh",
     padding: 20,
     paddingBottom: 90,
-    overflow: "hidden",
     background:
       "linear-gradient(180deg,#0f1225 0%,#151a3a 40%,#0b0f24 100%)",
     color: "#fff",
