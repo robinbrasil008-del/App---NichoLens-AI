@@ -172,19 +172,19 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* PROJETOS */}
-      <div style={styles.sectionTitle}>📁 Projetos criados</div>
+      {/* CHATS */}
+      <div style={styles.sectionTitle}>📁 Chats criados</div>
 
-      {projects.length === 0 ? (
-        <div style={styles.empty}>Nenhum projeto criado ainda</div>
+      {chats.length === 0 ? (
+        <div style={styles.empty}>Nenhum chat criado ainda</div>
       ) : (
-        projects.map((p) => (
-          <div key={p.id} style={styles.projectRow}>
+        chat.map((p) => (
+          <div key={p.id} style={styles.chattRow}>
             <div
-              style={styles.projectTitle}
+              style={styles.chatTitle}
               onClick={() => {
                 localStorage.setItem(
-                  `nicholens-open-project:${USER_KEY}`,
+                  `nicholens-open-chat:${USER_KEY}`,
                   p.id
                 );
                 router.push("/chat");
@@ -193,23 +193,23 @@ export default function ProfilePage() {
               📌 {p.title}
             </div>
 
-            <div style={styles.projectMenu}>
+            <div style={styles.chatMenu}>
               <button
                 onClick={() => {
                   const newName = prompt(
-                    "Novo nome do projeto:",
+                    "Novo nome do chat:",
                     p.title
                   );
                   if (!newName) return;
 
-                  const updated = projects.map((x) =>
+                  const updated = chats.map((x) =>
                     x.id === p.id
                       ? { ...x, title: newName }
                       : x
                   );
-                  setProjects(updated);
+                  setChats(updated);
                   localStorage.setItem(
-                    `nicholens-projects:${USER_KEY}`,
+                    `nicholens-Chats:${USER_KEY}`,
                     JSON.stringify(updated)
                   );
                 }}
@@ -219,14 +219,14 @@ export default function ProfilePage() {
 
               <button
                 onClick={() => {
-                  if (!confirm("Excluir este projeto?")) return;
+                  if (!confirm("Excluir este chat?")) return;
 
-                  const updated = projects.filter(
+                  const updated = chats.filter(
                     (x) => x.id !== p.id
                   );
-                  setProjects(updated);
+                  setChats(updated);
                   localStorage.setItem(
-                    `nicholens-projects:${USER_KEY}`,
+                    `nicholens-chats:${USER_KEY}`,
                     JSON.stringify(updated)
                   );
                 }}
