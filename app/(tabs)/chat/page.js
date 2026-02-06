@@ -27,12 +27,24 @@ export default function ChatPage() {
 
   if (!chatIdRef.current) chatIdRef.current = Date.now();
 
-  /* ===== LOAD PROJECTS ===== */
+  /* ===== LOAD PROJECTS + ABRIR PROJETO VINDO DO PERFIL ===== */
   useEffect(() => {
     if (typeof window === "undefined") return;
+
     const saved =
       JSON.parse(localStorage.getItem("nicholens-projects")) || [];
     setProjects(saved);
+
+    // ✅ se o Perfil mandou abrir um projeto específico
+    const openId = localStorage.getItem("nicholens-open-project");
+    if (openId) {
+      const project = saved.find((p) => String(p.id) === String(openId));
+      if (project) {
+        chatIdRef.current = project.id;
+        setMessages(project.messages || []);
+      }
+      localStorage.removeItem("nicholens-open-project");
+    }
   }, []);
 
   /* ===== AUTO SCROLL (SOMENTE DENTRO DO CHAT) ===== */
@@ -169,44 +181,45 @@ export default function ChatPage() {
       </div>
 
       {menuOpen && (
-  <div style={styles.menu} ref={menuRef}>
-    <button style={styles.menuItem} onClick={newChat}>
-      ➕ Novo chat
-    </button>
-
-    <div style={styles.menuTitle}>📁 Projetos salvos</div>
-
-    {projects.length === 0 && (
-      <div style={styles.menuEmpty}>Nenhum projeto ainda</div>
-    )}
-
-    {projects.map((p) => (
-      <div key={p.id} style={styles.projectItem}>
-        <button
-          style={styles.projectBtn}
-          onClick={() => loadProject(p)}
-        >
-          📌 {p.title}
-        </button>
-
-        <div style={styles.projectActions}>
-          <button
-            onClick={() => renameProject(p.id)}
-            style={styles.iconBtn}
-          >
-            ✏️
+        <div style={styles.menu} ref={menuRef}>
+          <button style={styles.menuItem} onClick={newChat}>
+            ➕ Novo chat
           </button>
-          <button
-            onClick={() => deleteProject(p.id)}
-            style={styles.iconBtn}
-          >
-            🗑️
-          </button>
+
+          <div style={styles.menuTitle}>📁 Projetos salvos</div>
+
+          {projects.length === 0 && (
+            <div style={styles.menuEmpty}>Nenhum projeto ainda</div>
+          )}
+
+          {projects.map((p) => (
+            <div key={p.id} style={styles.projectItem}>
+              <button
+                style={styles.projectBtn}
+                onClick={() => loadProject(p)}
+              >
+                📌 {p.title}
+              </button>
+
+              <div style={styles.projectActions}>
+                <button
+                  onClick={() => renameProject(p.id)}
+                  style={styles.iconBtn}
+                >
+                  ✏️
+                </button>
+                <button
+                  onClick={() => deleteProject(p.id)}
+                  style={styles.iconBtn}
+                >
+                  🗑️
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
-      </div>
-    ))}
-  </div>
-)}
+      )}
+
       {/* CONTEÚDO */}
       <div style={styles.content}>
         {messages.length === 0 && (
@@ -375,81 +388,82 @@ const styles = {
     color: "#fff",
     cursor: "pointer",
   },
+
   menu: {
-  position: "absolute",
-  top: 56,
-  left: 10,
-  background: "#141836",
-  borderRadius: 16,
-  padding: 12,
-  width: 270,
-  zIndex: 50,
-  boxShadow: "0 20px 40px rgba(0,0,0,0.45)",
-},
+    position: "absolute",
+    top: 56,
+    left: 10,
+    background: "#141836",
+    borderRadius: 16,
+    padding: 12,
+    width: 270,
+    zIndex: 50,
+    boxShadow: "0 20px 40px rgba(0,0,0,0.45)",
+  },
 
-menuTitle: {
-  fontSize: 12,
-  opacity: 0.6,
-  margin: "10px 0 6px",
-  textTransform: "uppercase",
-  letterSpacing: 0.6,
-},
+  menuTitle: {
+    fontSize: 12,
+    opacity: 0.6,
+    margin: "10px 0 6px",
+    textTransform: "uppercase",
+    letterSpacing: 0.6,
+  },
 
-menuItem: {
-  width: "100%",
-  padding: "10px 12px",
-  background: "#1c2142",
-  border: "none",
-  color: "#fff",
-  textAlign: "left",
-  cursor: "pointer",
-  borderRadius: 10,
-  fontWeight: 600,
-  marginBottom: 8,
-},
+  menuItem: {
+    width: "100%",
+    padding: "10px 12px",
+    background: "#1c2142",
+    border: "none",
+    color: "#fff",
+    textAlign: "left",
+    cursor: "pointer",
+    borderRadius: 10,
+    fontWeight: 600,
+    marginBottom: 8,
+  },
 
-projectItem: {
-  display: "flex",
-  alignItems: "center",
-  gap: 8,
-  background: "#1c2142",
-  borderRadius: 12,
-  padding: "8px 10px",
-  marginBottom: 6,
-},
+  projectItem: {
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+    background: "#1c2142",
+    borderRadius: 12,
+    padding: "8px 10px",
+    marginBottom: 6,
+  },
 
-projectBtn: {
-  background: "none",
-  border: "none",
-  color: "#fff",
-  flex: 1,
-  textAlign: "left",
-  cursor: "pointer",
-  fontSize: 14,
-  whiteSpace: "nowrap",
-  overflow: "hidden",
-  textOverflow: "ellipsis",
-},
+  projectBtn: {
+    background: "none",
+    border: "none",
+    color: "#fff",
+    flex: 1,
+    textAlign: "left",
+    cursor: "pointer",
+    fontSize: 14,
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+  },
 
-projectActions: {
-  display: "flex",
-  gap: 6,
-},
+  projectActions: {
+    display: "flex",
+    gap: 6,
+  },
 
-iconBtn: {
-  background: "#232a55",
-  border: "none",
-  color: "#fff",
-  cursor: "pointer",
-  borderRadius: 8,
-  padding: "4px 6px",
-  fontSize: 12,
-},
+  iconBtn: {
+    background: "#232a55",
+    border: "none",
+    color: "#fff",
+    cursor: "pointer",
+    borderRadius: 8,
+    padding: "4px 6px",
+    fontSize: 12,
+  },
 
-menuEmpty: {
-  opacity: 0.5,
-  fontSize: 13,
-  padding: "6px 0",
-  textAlign: "center",
-},
+  menuEmpty: {
+    opacity: 0.5,
+    fontSize: 13,
+    padding: "6px 0",
+    textAlign: "center",
+  },
 };
