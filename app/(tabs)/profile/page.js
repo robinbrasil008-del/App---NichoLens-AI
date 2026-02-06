@@ -244,11 +244,12 @@ export default function ProfilePage() {
 
 const styles = {
   page: {
-    height: "100%",
-    padding: 20,
-    background: "linear-gradient(180deg,#0f1225,#0b0f24)",
-    color: "#fff",
-  },
+  minHeight: "100vh", // 🔥 garante altura real da tela
+  padding: 20,
+  background: "linear-gradient(180deg,#0f1225,#0b0f24)",
+  color: "#fff",
+  display: "flex", // 🔥 ativa flex
+},
   pageScroll: {
     height: "100%",
     padding: 20,
@@ -258,11 +259,13 @@ const styles = {
     color: "#fff",
   },
   center: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    gap: 26,
-  },
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  justifyContent: "center", // 🔥 CENTRALIZA NO MEIO DA TELA
+  gap: 26,
+  width: "100%",
+},
 
   profileHeader: {
     display: "flex",
