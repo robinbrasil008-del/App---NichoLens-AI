@@ -1,7 +1,14 @@
 "use client";
 
 import { SessionProvider } from "next-auth/react";
+import { TicketProvider } from "./context/TicketContext";
 
-export default function Providers({ children }) {
-  return <SessionProvider>{children}</SessionProvider>;
+export function Providers({ children }) {
+  return (
+    <SessionProvider refetchOnWindowFocus={false}>
+      <TicketProvider>
+        {children}
+      </TicketProvider>
+    </SessionProvider>
+  );
 }
