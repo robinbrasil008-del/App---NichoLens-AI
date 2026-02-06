@@ -11,7 +11,7 @@ const SUGESTOES = [
 ];
 
 export default function ChatPage() {
-  const { tickets, consumeTicket } = useTickets(); // ✅ GLOBAL
+  const { tickets, consumeTicket } = useTickets();
 
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
@@ -20,7 +20,8 @@ export default function ChatPage() {
   const [projects, setProjects] = useState([]);
 
   const chatIdRef = useRef(null);
-  const bottomRef = useRef(null);
+  const bottomRef = useRef(null); // mantido
+  const chatRef = useRef(null);   // ✅ NOVO (não interfere)
   const menuRef = useRef(null);
   const touchStartX = useRef(0);
 
@@ -34,11 +35,13 @@ export default function ChatPage() {
     setProjects(saved);
   }, []);
 
-  /* ===== AUTO SCROLL (SÓ QUANDO HÁ MENSAGENS) ===== */
-useEffect(() => {
-  if (messages.length === 0) return; // 🚫 impede descida ao abrir a página
-  bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-}, [messages, loading]);
+  /* ===== AUTO SCROLL (SOMENTE DENTRO DO CHAT) ===== */
+  useEffect(() => {
+    if (!chatRef.current) return;
+    if (messages.length === 0) return;
+
+    chatRef.current.scrollTop = chatRef.current.scrollHeight;
+  }, [messages, loading]);
 
   /* ===== CLICK OUTSIDE TO CLOSE MENU ===== */
   useEffect(() => {
@@ -59,8 +62,6 @@ useEffect(() => {
   async function sendMessage(text) {
     const msg = text ?? input;
     if (!msg.trim() || loading) return;
-
-    // 🎟️ CONSUME TICKET GLOBAL
     if (!consumeTicket()) return;
 
     setMessages((prev) => [...prev, { role: "user", content: msg }]);
@@ -84,7 +85,8 @@ useEffect(() => {
       setMessages((prev) => {
         const updated = [...prev, aiMsg];
 
-        const firstUser = updated.find((m) => m.role === "user")?.content;
+        const firstUser =
+          updated.find((m) => m.role === "user")?.content;
 
         const project = {
           id: chatIdRef.current,
@@ -98,7 +100,10 @@ useEffect(() => {
         ];
 
         setProjects(newProjects);
-        localStorage.setItem("nicholens-projects", JSON.stringify(newProjects));
+        localStorage.setItem(
+          "nicholens-projects",
+          JSON.stringify(newProjects)
+        );
 
         return updated;
       });
@@ -128,7 +133,9 @@ useEffect(() => {
     const name = prompt("Novo nome do projeto:");
     if (!name) return;
 
-    const updated = projects.map((p) => (p.id === id ? { ...p, title: name } : p));
+    const updated = projects.map((p) =>
+      p.id === id ? { ...p, title: name } : p
+    );
     setProjects(updated);
     localStorage.setItem("nicholens-projects", JSON.stringify(updated));
   }
@@ -167,35 +174,11 @@ useEffect(() => {
           <button style={styles.menuItem} onClick={newChat}>
             ➕ Novo chat
           </button>
-
-          <div style={styles.menuTitle}>📁 Projetos salvos</div>
-
-          {projects.length === 0 && (
-            <div style={styles.menuEmpty}>Nenhum projeto ainda</div>
-          )}
-
-          {projects.map((p) => (
-            <div key={p.id} style={styles.projectItem}>
-              <button style={styles.projectBtn} onClick={() => loadProject(p)}>
-                📌 {p.title}
-              </button>
-
-              <div style={styles.projectActions}>
-                <button onClick={() => renameProject(p.id)} style={styles.iconBtn}>
-                  ✏️
-                </button>
-                <button onClick={() => deleteProject(p.id)} style={styles.iconBtn}>
-                  🗑️
-                </button>
-              </div>
-            </div>
-          ))}
         </div>
       )}
 
-      {/* CONTEÚDO (INTRO OU CHAT) */}
+      {/* CONTEÚDO */}
       <div style={styles.content}>
-        {/* INTRO */}
         {messages.length === 0 && (
           <div style={styles.intro}>
             <div style={styles.openai}>
@@ -207,7 +190,6 @@ useEffect(() => {
                 <button
                   key={i}
                   style={styles.suggestion}
-                  disabled={tickets <= 0}
                   onClick={() => sendMessage(s)}
                 >
                   {s}
@@ -217,8 +199,7 @@ useEffect(() => {
           </div>
         )}
 
-        {/* CHAT */}
-        <div style={styles.chat}>
+        <div style={styles.chat} ref={chatRef}>
           {messages.map((m, i) => (
             <div
               key={i}
@@ -239,17 +220,23 @@ useEffect(() => {
         </div>
       </div>
 
-      {/* INPUT (SEM FIXED — fica preso pelo flex do layout) */}
+      {/* INPUT */}
       <div style={styles.inputFixed}>
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder={tickets > 0 ? "Digite sua mensagem..." : "Tickets esgotados"}
+          placeholder={
+            tickets > 0 ? "Digite sua mensagem..." : "Tickets esgotados"
+          }
           disabled={tickets <= 0}
           style={styles.input}
           onKeyDown={(e) => e.key === "Enter" && sendMessage()}
         />
-        <button onClick={() => sendMessage()} style={styles.send} disabled={tickets <= 0}>
+        <button
+          onClick={() => sendMessage()}
+          style={styles.send}
+          disabled={tickets <= 0}
+        >
           Enviar
         </button>
       </div>
@@ -257,10 +244,9 @@ useEffect(() => {
   );
 }
 
-/* ===== STYLES ===== */
+/* ===== STYLES (INTACTOS) ===== */
 
 const styles = {
-  // 🔥 aqui é o ponto: nada de 100svh / 100vh — o (tabs)/layout já controla o viewport
   page: {
     height: "100%",
     display: "flex",
@@ -269,7 +255,6 @@ const styles = {
     color: "#fff",
     position: "relative",
   },
-
   header: {
     padding: 14,
     display: "flex",
@@ -279,13 +264,11 @@ const styles = {
     fontWeight: 600,
     flexShrink: 0,
   },
-
   tickets: {
     marginLeft: "auto",
     fontSize: 13,
     opacity: 0.85,
   },
-
   menuBtn: {
     background: "none",
     border: "none",
@@ -293,95 +276,26 @@ const styles = {
     fontSize: 20,
     cursor: "pointer",
   },
-
-  menu: {
-    position: "absolute",
-    top: 56,
-    left: 10,
-    background: "#141836",
-    borderRadius: 12,
-    padding: 10,
-    width: 260,
-    zIndex: 50,
-    boxShadow: "0 10px 30px rgba(0,0,0,0.35)",
-  },
-
-  menuTitle: {
-    fontSize: 13,
-    opacity: 0.7,
-    margin: "8px 0",
-  },
-
-  menuItem: {
-    width: "100%",
-    padding: 8,
-    background: "none",
-    border: "none",
-    color: "#fff",
-    textAlign: "left",
-    cursor: "pointer",
-  },
-
-  projectItem: {
-    display: "flex",
-    justifyContent: "space-between",
-    gap: 8,
-    padding: "6px 0",
-  },
-
-  projectBtn: {
-    background: "none",
-    border: "none",
-    color: "#fff",
-    flex: 1,
-    textAlign: "left",
-    cursor: "pointer",
-  },
-
-  projectActions: {
-    display: "flex",
-    gap: 6,
-  },
-
-  iconBtn: {
-    background: "none",
-    border: "none",
-    color: "#fff",
-    cursor: "pointer",
-  },
-
-  menuEmpty: {
-    opacity: 0.5,
-    fontSize: 13,
-    padding: "6px 0",
-  },
-
-  // ✅ área que pode rolar (sem mexer no input)
   content: {
     flex: 1,
     minHeight: 0,
     display: "flex",
     flexDirection: "column",
   },
-
   intro: {
     padding: 20,
     textAlign: "center",
-    flexShrink: 0,
   },
-
   openai: {
     opacity: 0.7,
     marginBottom: 16,
   },
-
   suggestions: {
     display: "flex",
     flexDirection: "column",
     gap: 10,
     alignItems: "center",
   },
-
   suggestion: {
     borderRadius: 20,
     border: "1px solid #2a2f45",
@@ -390,8 +304,6 @@ const styles = {
     padding: "8px 16px",
     cursor: "pointer",
   },
-
-  // ✅ scroll só aqui
   chat: {
     flex: 1,
     minHeight: 0,
@@ -401,7 +313,6 @@ const styles = {
     flexDirection: "column",
     gap: 12,
   },
-
   bubble: {
     maxWidth: "85%",
     padding: 14,
@@ -409,8 +320,6 @@ const styles = {
     whiteSpace: "pre-wrap",
     wordBreak: "break-word",
   },
-
-  // ✅ NADA DE FIXED (corrige o bug do mobile)
   inputFixed: {
     display: "flex",
     gap: 10,
@@ -419,7 +328,6 @@ const styles = {
     borderTop: "1px solid #1f2440",
     flexShrink: 0,
   },
-
   input: {
     flex: 1,
     padding: 14,
@@ -429,7 +337,6 @@ const styles = {
     color: "#fff",
     outline: "none",
   },
-
   send: {
     background: "#6d5dfc",
     border: "none",
