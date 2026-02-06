@@ -24,6 +24,7 @@ export default function TabsLayout({ children }) {
       >
         <TabLink href="/" label="Início" icon="🏠" />
         <TabLink href="/chat" label="Chat IA" icon="💬" />
+        <TabLink href="/profile" label="Perfil" icon="👤" />
       </nav>
     </div>
   );
