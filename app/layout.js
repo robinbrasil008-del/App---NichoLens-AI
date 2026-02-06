@@ -1,17 +1,23 @@
-"use client";
+import { Providers } from "./providers";
 
-import { TicketProvider } from "./context/TicketContext";
-import { SessionProvider } from "next-auth/react";
+export const metadata = {
+  title: "NichoLens AI",
+  description: "Análise inteligente de perfis com IA",
+};
 
 export default function RootLayout({ children }) {
   return (
     <html lang="pt-BR">
-      <body style={{ margin: 0 }}>
-        <SessionProvider refetchOnWindowFocus={false}>
-          <TicketProvider>
-            {children}
-          </TicketProvider>
-        </SessionProvider>
+      <body
+        style={{
+          margin: 0,
+          minHeight: "100vh",
+          backgroundColor: "#0f1225",
+        }}
+      >
+        <Providers>
+          {children}
+        </Providers>
       </body>
     </html>
   );
