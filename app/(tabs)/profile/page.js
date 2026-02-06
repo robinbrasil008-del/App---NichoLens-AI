@@ -86,10 +86,12 @@ export default function ProfilePage() {
             />
           ) : (
             <div style={styles.name} onClick={() => setEditName(true)}>
-              {name || session.user?.name}
+              {name || session.user?.name} ✏️
             </div>
           )}
+
           <div style={styles.email}>{session.user?.email}</div>
+
           <button
             style={styles.linkBtn}
             onClick={() => window.open("https://myaccount.google.com", "_blank")}
@@ -108,6 +110,7 @@ export default function ProfilePage() {
 
         <div style={styles.infoRow}>
           <span>🎯 Nicho</span>
+
           {editNicho ? (
             <input
               value={nicho}
@@ -120,8 +123,11 @@ export default function ProfilePage() {
               style={styles.editInputSmall}
             />
           ) : (
-            <span onClick={() => setEditNicho(true)} style={{ opacity: 0.7 }}>
-              {nicho || "(opcional)"}
+            <span
+              style={styles.nichoView}
+              onClick={() => setEditNicho(true)}
+            >
+              {nicho || "(opcional)"} <span style={styles.pencil}>✏️</span>
             </span>
           )}
         </div>
@@ -137,7 +143,10 @@ export default function ProfilePage() {
           <div key={p.id} style={styles.projectRow}>
             <div
               style={styles.projectTitle}
-              onClick={() => router.push("/chat")}
+              onClick={() => {
+                localStorage.setItem("nicholens-open-project", p.id);
+                router.push("/chat");
+              }}
             >
               📌 {p.title}
             </div>
@@ -262,6 +271,19 @@ const styles = {
     justifyContent: "space-between",
     padding: "6px 0",
     fontSize: 14,
+    alignItems: "center",
+  },
+
+  nichoView: {
+    opacity: 0.8,
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    gap: 6,
+  },
+  pencil: {
+    fontSize: 13,
+    opacity: 0.7,
   },
 
   sectionTitle: {
