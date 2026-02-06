@@ -8,13 +8,9 @@ export default function ProfilePage() {
   const { data: session, status } = useSession();
   const { tickets } = useTickets();
   const [projects, setProjects] = useState([]);
-  const [vh, setVh] = useState(null);
 
-  // 🔒 trava altura real da tela (ANTI PULO)
   useEffect(() => {
     if (typeof window !== "undefined") {
-      setVh(window.innerHeight);
-
       const stored =
         JSON.parse(localStorage.getItem("nicholens-projects")) || [];
       setProjects(stored);
@@ -22,27 +18,13 @@ export default function ProfilePage() {
   }, []);
 
   if (status === "loading") {
-    return (
-      <div
-        style={{
-          ...styles.page,
-          height: vh ? `${vh}px` : "100vh",
-        }}
-      />
-    );
+    return <div style={styles.page} />;
   }
 
   /* ===== NÃO LOGADO ===== */
   if (!session) {
     return (
-      <div
-        style={{
-          ...styles.page,
-          ...styles.center,
-          height: vh ? `${vh}px` : "100vh",
-          overflow: "hidden",
-        }}
-      >
+      <div style={{ ...styles.page, ...styles.center }}>
         {/* LOGIN */}
         <div style={styles.authBlock}>
           <span style={styles.authText}>
@@ -90,13 +72,7 @@ export default function ProfilePage() {
 
   /* ===== LOGADO ===== */
   return (
-    <div
-      style={{
-        ...styles.page,
-        height: vh ? `${vh}px` : "100vh",
-        overflowY: "auto",
-      }}
-    >
+    <div style={styles.pageScroll}>
       <h2 style={styles.title}>Minha Conta</h2>
 
       <div style={styles.card}>
@@ -129,8 +105,24 @@ export default function ProfilePage() {
 
 const styles = {
   page: {
+    height: "100vh",
     padding: 20,
     paddingBottom: 90,
+    display: "flex",
+    justifyContent: "center",
+    background:
+      "linear-gradient(180deg,#0f1225 0%,#151a3a 40%,#0b0f24 100%)",
+    color: "#fff",
+    fontFamily:
+      '"Plus Jakarta Sans", system-ui, -apple-system, Segoe UI, Roboto',
+    overflow: "hidden",
+  },
+
+  pageScroll: {
+    height: "100vh",
+    padding: 20,
+    paddingBottom: 90,
+    overflowY: "auto",
     background:
       "linear-gradient(180deg,#0f1225 0%,#151a3a 40%,#0b0f24 100%)",
     color: "#fff",
@@ -139,9 +131,7 @@ const styles = {
   },
 
   center: {
-    display: "flex",
     flexDirection: "column",
-    justifyContent: "center",
     alignItems: "center",
     gap: 26,
   },
