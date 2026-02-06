@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import { useTickets } from "../context/TicketContext";
+import { useSession, signIn, signOut } from "next-auth/react";
 
 export default function HomePage() {
   const { tickets, consumeTicket } = useTickets();
+  const { data: session, status } = useSession();
 
   const [url, setUrl] = useState("");
   const [analysis, setAnalysis] = useState("");
@@ -28,7 +30,7 @@ export default function HomePage() {
 
       let clean = data.result || "Nenhum resultado retornado.";
 
-      // ✅ OPÇÃO A — remove mensagens fracas da IA
+      // remove aviso fraco da IA
       clean = clean.replace(
         /não consigo acessar diretamente links.*?mencionou\./gi,
         ""
@@ -51,8 +53,29 @@ export default function HomePage() {
       {/* HEADER */}
       <header style={styles.header}>
         <h1 style={styles.title}>NichoLens AI</h1>
-        <div style={styles.tickets}>🎟️ {tickets}</div>
+
+        {/* AÇÕES DIREITA */}
+        <div style={styles.headerRight}>
+          <div style={styles.tickets}>🎟️ {tickets}</div>
+
+          {status === "authenticated" ? (
+            <button onClick={() => signOut()} style={styles.authBtn}>
+              Sair
+            </button>
+          ) : (
+            <button onClick={() => signIn("google")} style={styles.authBtn}>
+              Entrar
+            </button>
+          )}
+        </div>
       </header>
+
+      {/* CTA REGISTRO */}
+      {!session && (
+        <div style={styles.cta}>
+          🎁 Registre-se com Google e ganhe <b>+2 tickets grátis</b>
+        </div>
+      )}
 
       {/* INPUT */}
       <div style={styles.card}>
@@ -132,7 +155,7 @@ const styles = {
   header: {
     display: "flex",
     alignItems: "center",
-    marginBottom: 24,
+    marginBottom: 10,
   },
 
   title: {
@@ -141,10 +164,33 @@ const styles = {
     margin: 0,
   },
 
-  tickets: {
+  headerRight: {
     marginLeft: "auto",
+    display: "flex",
+    alignItems: "center",
+    gap: 10,
+  },
+
+  tickets: {
     fontSize: 14,
     fontWeight: 800,
+    opacity: 0.9,
+  },
+
+  authBtn: {
+    padding: "6px 12px",
+    borderRadius: 10,
+    border: "none",
+    background: "#2a2f55",
+    color: "#fff",
+    fontSize: 13,
+    fontWeight: 700,
+    cursor: "pointer",
+  },
+
+  cta: {
+    marginBottom: 20,
+    fontSize: 14,
     opacity: 0.9,
   },
 
