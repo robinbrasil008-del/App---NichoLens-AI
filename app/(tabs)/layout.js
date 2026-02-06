@@ -6,19 +6,23 @@ export default function TabsLayout({ children }) {
   return (
     <div
       style={{
-        height: "100dvh", // 🔥 viewport real do mobile
+        height: "100dvh", // viewport real mobile
         display: "flex",
         flexDirection: "column",
         overflow: "hidden",
         background: "#0f1225",
       }}
     >
-      {/* CONTEÚDO COM SCROLL */}
+      {/* CONTEÚDO COM SCROLL CONTROLADO */}
       <div
         style={{
           flex: 1,
           overflowY: "auto",
           WebkitOverflowScrolling: "touch",
+
+          // ✅ CORREÇÃO FINAL DO BUG
+          overscrollBehavior: "contain",
+          touchAction: "pan-y",
         }}
       >
         {children}
