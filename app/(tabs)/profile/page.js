@@ -47,36 +47,42 @@ export default function ProfilePage() {
   if (!session) {
   return (
     <div style={{ ...styles.page, ...styles.center }}>
-      <span style={styles.authText}>Faça o login autenticado com:</span>
+  <div style={{ width: "100%", maxWidth: 320 }}>
 
-      <button
-        style={styles.loginBtn}
-        onClick={() => signIn("google")}
-      >
-        <img
-          src="https://www.google.com/favicon.ico"
-          alt="Google"
-          style={{ width: 20, height: 20 }}
-        />
-        Login com Google
-      </button>
+    <span style={styles.authText}>
+      Faça o login autenticado com:
+    </span>
 
-      <span style={{ ...styles.authText, marginTop: 24 }}>
-        Faça o registro autenticado com:
-      </span>
+    <button
+      style={{ ...styles.loginBtn, width: "100%" }}
+      onClick={() => signIn("google")}
+    >
+      <img
+        src="https://www.google.com/favicon.ico"
+        alt="Google"
+        style={{ width: 20, height: 20, marginRight: 10 }}
+      />
+      Login com Google
+    </button>
 
-      <button
-        style={styles.registerBtn}
-        onClick={() => signIn("google")}
-      >
-        <img
-          src="https://www.google.com/favicon.ico"
-          alt="Google"
-          style={{ width: 20, height: 20 }}
-        />
-        Registrar-se
-      </button>
-    </div>
+    <span style={{ ...styles.authText, marginTop: 24 }}>
+      Faça o registro autenticado com:
+    </span>
+
+    <button
+      style={{ ...styles.registerBtn, width: "100%" }}
+      onClick={() => signIn("google")}
+    >
+      <img
+        src="https://www.google.com/favicon.ico"
+        alt="Google"
+        style={{ width: 20, height: 20, marginRight: 10 }}
+      />
+      Registrar-se
+    </button>
+
+  </div>
+</div>
   );
 }
   /* ===== LOGADO ===== */
@@ -245,11 +251,10 @@ export default function ProfilePage() {
 
 const styles = {
   page: {
-  minHeight: "100vh", // 🔥 garante altura real da tela
+  minHeight: "100vh",
   padding: 20,
   background: "linear-gradient(180deg,#0f1225,#0b0f24)",
   color: "#fff",
-  display: "flex", // 🔥 ativa flex
 },
   pageScroll: {
     height: "100%",
@@ -263,9 +268,8 @@ const styles = {
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
-  justifyContent: "center", // 🔥 CENTRALIZA NO MEIO DA TELA
+  justifyContent: "center",
   gap: 26,
-  width: "100%",
 },
 
   profileHeader: {
