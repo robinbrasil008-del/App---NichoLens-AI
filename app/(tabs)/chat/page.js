@@ -201,15 +201,15 @@ export default function ChatPage() {
           )}
 
           {chats.map((c) => (
-            <div key={c.id} style={styles.projectItem}>
+            <div key={c.id} style={styles.chatItem}>
               <button
-                style={styles.projectBtn}
+                style={styles.chatBtn}
                 onClick={() => loadChat(c)}
               >
                 📌 {c.title}
               </button>
 
-              <div style={styles.projectActions}>
+              <div style={styles.chatActions}>
                 <button
                   onClick={() => renameChat(c.id)}
                   style={styles.iconBtn}
