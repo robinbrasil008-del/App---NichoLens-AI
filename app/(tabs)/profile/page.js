@@ -10,7 +10,6 @@ export default function ProfilePage() {
 
   const [projects, setProjects] = useState([]);
 
-  // ✅ localStorage SOMENTE no client
   useEffect(() => {
     const stored =
       JSON.parse(localStorage.getItem("nicholens-projects")) || [];
@@ -18,28 +17,34 @@ export default function ProfilePage() {
   }, []);
 
   if (status === "loading") {
-    return <div style={styles.page}>Carregando...</div>;
+    return <div style={styles.page} />;
   }
 
+  /* ===== NÃO LOGADO ===== */
   if (!session) {
     return (
-      <div style={styles.page}>
-        <h2 style={styles.title}>Perfil</h2>
+      <div style={{ ...styles.page, ...styles.center }}>
+        <button
+          style={styles.mainBtn}
+          onClick={() => signIn("google")}
+        >
+          Entrar
+        </button>
 
-        <p style={styles.text}>
-          Você precisa estar logado para acessar seu perfil.
-        </p>
-
-        <button style={styles.button} onClick={() => signIn("google")}>
-          Entrar com Google
+        <button
+          style={styles.secondaryBtn}
+          onClick={() => signIn("google")}
+        >
+          Registrar-se
         </button>
       </div>
     );
   }
 
+  /* ===== LOGADO ===== */
   return (
     <div style={styles.page}>
-      <h2 style={styles.title}>Meu Perfil</h2>
+      <h2 style={styles.title}>Minha Conta</h2>
 
       <div style={styles.card}>
         <p><b>Nome:</b> {session.user?.name}</p>
@@ -81,6 +86,38 @@ const styles = {
       '"Plus Jakarta Sans", system-ui, -apple-system, Segoe UI, Roboto',
   },
 
+  center: {
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 16,
+  },
+
+  mainBtn: {
+    width: 220,
+    padding: "14px 16px",
+    borderRadius: 14,
+    border: "none",
+    background: "linear-gradient(90deg,#6d5dfc,#8b5cf6)",
+    color: "#fff",
+    fontWeight: 900,
+    fontSize: 16,
+    cursor: "pointer",
+  },
+
+  secondaryBtn: {
+    width: 220,
+    padding: "12px 16px",
+    borderRadius: 14,
+    border: "1px solid #6d5dfc",
+    background: "transparent",
+    color: "#fff",
+    fontWeight: 700,
+    fontSize: 15,
+    cursor: "pointer",
+  },
+
   title: {
     fontSize: 28,
     fontWeight: 900,
@@ -109,16 +146,6 @@ const styles = {
   text: {
     opacity: 0.9,
     marginBottom: 14,
-  },
-
-  button: {
-    padding: "12px 16px",
-    borderRadius: 12,
-    border: "none",
-    background: "#6d5dfc",
-    color: "#fff",
-    fontWeight: 800,
-    cursor: "pointer",
   },
 
   logout: {
