@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { useTickets } from "../../context/TicketContext";
 
@@ -7,8 +8,14 @@ export default function ProfilePage() {
   const { data: session, status } = useSession();
   const { tickets } = useTickets();
 
-  const projects =
-    JSON.parse(localStorage.getItem("nicholens-projects")) || [];
+  const [projects, setProjects] = useState([]);
+
+  // ✅ localStorage SOMENTE no client
+  useEffect(() => {
+    const stored =
+      JSON.parse(localStorage.getItem("nicholens-projects")) || [];
+    setProjects(stored);
+  }, []);
 
   if (status === "loading") {
     return <div style={styles.page}>Carregando...</div>;
@@ -37,7 +44,7 @@ export default function ProfilePage() {
       <div style={styles.card}>
         <p><b>Nome:</b> {session.user?.name}</p>
         <p><b>E-mail:</b> {session.user?.email}</p>
-        <p><b>Tickets disponíveis:</b> 🎟️ {tickets}</p>
+        <p><b>Tickets:</b> 🎟️ {tickets}</p>
         <p><b>Nicho:</b> <i>(opcional)</i></p>
       </div>
 
