@@ -11,15 +11,27 @@ const handler = NextAuth({
 
   secret: process.env.NEXTAUTH_SECRET,
 
+  trustHost: true, // 🔥 ESSENCIAL para mobile + Vercel
+
   session: {
     strategy: "jwt",
   },
 
+  cookies: {
+    sessionToken: {
+      name: `next-auth.session-token`,
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: true,
+      },
+    },
+  },
+
   callbacks: {
     async jwt({ token, user }) {
-      if (user) {
-        token.user = user;
-      }
+      if (user) token.user = user;
       return token;
     },
 
