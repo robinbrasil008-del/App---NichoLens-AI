@@ -297,7 +297,7 @@ export default function ChatPage() {
 
 const styles = {
   page: {
-    height: "100vh",
+    height: "100svh",
     display: "flex",
     flexDirection: "column",
     background: "linear-gradient(180deg,#0f1225,#090b17)",
