@@ -3,23 +3,34 @@
 import { useEffect, useState } from "react";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { useTickets } from "../../context/TicketContext";
+import { useRouter } from "next/navigation";
 
 export default function ProfilePage() {
   const { data: session, status } = useSession();
   const { tickets } = useTickets();
+  const router = useRouter();
+
   const [projects, setProjects] = useState([]);
+  const [name, setName] = useState("");
+  const [nicho, setNicho] = useState("");
+  const [editName, setEditName] = useState(false);
+  const [editNicho, setEditNicho] = useState(false);
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const stored =
-        JSON.parse(localStorage.getItem("nicholens-projects")) || [];
-      setProjects(stored);
-    }
+    if (typeof window === "undefined") return;
+
+    const storedProjects =
+      JSON.parse(localStorage.getItem("nicholens-projects")) || [];
+    setProjects(storedProjects);
+
+    const savedName = localStorage.getItem("nicholens-name");
+    const savedNicho = localStorage.getItem("nicholens-nicho");
+
+    if (savedName) setName(savedName);
+    if (savedNicho) setNicho(savedNicho);
   }, []);
 
-  if (status === "loading") {
-    return <div style={styles.page} />;
-  }
+  if (status === "loading") return <div style={styles.page} />;
 
   /* ===== NÃO LOGADO ===== */
   if (!session) {
@@ -28,11 +39,7 @@ export default function ProfilePage() {
         <div style={styles.authBlock}>
           <span style={styles.authText}>Faça o login autenticado com:</span>
           <div style={styles.provider}>
-            <img
-              src="https://www.google.com/favicon.ico"
-              alt="Google"
-              style={styles.googleIcon}
-            />
+            <img src="https://www.google.com/favicon.ico" alt="Google" style={styles.googleIcon} />
             <button style={styles.loginBtn} onClick={() => signIn("google")}>
               Login
             </button>
@@ -42,11 +49,7 @@ export default function ProfilePage() {
         <div style={styles.authBlock}>
           <span style={styles.authText}>Faça o registro autenticado com:</span>
           <div style={styles.provider}>
-            <img
-              src="https://www.google.com/favicon.ico"
-              alt="Google"
-              style={styles.googleIcon}
-            />
+            <img src="https://www.google.com/favicon.ico" alt="Google" style={styles.googleIcon} />
             <button style={styles.registerBtn} onClick={() => signIn("google")}>
               Registrar-se
             </button>
@@ -61,12 +64,38 @@ export default function ProfilePage() {
     <div style={styles.pageScroll}>
       {/* HEADER PERFIL */}
       <div style={styles.profileHeader}>
-        <div style={styles.avatar}>
-          {session.user?.name?.charAt(0) || "U"}
-        </div>
-        <div>
-          <div style={styles.name}>{session.user?.name}</div>
+        {session.user?.image ? (
+          <img src={session.user.image} alt="Avatar" style={styles.avatarImg} />
+        ) : (
+          <div style={styles.avatar}>
+            {(name || session.user?.name || "U").charAt(0)}
+          </div>
+        )}
+
+        <div style={{ flex: 1 }}>
+          {editName ? (
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              onBlur={() => {
+                localStorage.setItem("nicholens-name", name);
+                setEditName(false);
+              }}
+              autoFocus
+              style={styles.editInput}
+            />
+          ) : (
+            <div style={styles.name} onClick={() => setEditName(true)}>
+              {name || session.user?.name}
+            </div>
+          )}
           <div style={styles.email}>{session.user?.email}</div>
+          <button
+            style={styles.linkBtn}
+            onClick={() => window.open("https://myaccount.google.com", "_blank")}
+          >
+            Alterar foto
+          </button>
         </div>
       </div>
 
@@ -76,9 +105,25 @@ export default function ProfilePage() {
           <span>🎟️ Tickets</span>
           <b>{tickets}</b>
         </div>
+
         <div style={styles.infoRow}>
           <span>🎯 Nicho</span>
-          <i style={{ opacity: 0.6 }}>(opcional)</i>
+          {editNicho ? (
+            <input
+              value={nicho}
+              onChange={(e) => setNicho(e.target.value)}
+              onBlur={() => {
+                localStorage.setItem("nicholens-nicho", nicho);
+                setEditNicho(false);
+              }}
+              autoFocus
+              style={styles.editInputSmall}
+            />
+          ) : (
+            <span onClick={() => setEditNicho(true)} style={{ opacity: 0.7 }}>
+              {nicho || "(opcional)"}
+            </span>
+          )}
         </div>
       </div>
 
@@ -89,8 +134,46 @@ export default function ProfilePage() {
         <div style={styles.empty}>Nenhum projeto criado ainda</div>
       ) : (
         projects.map((p) => (
-          <div key={p.id} style={styles.menuItem}>
-            📌 {p.title}
+          <div key={p.id} style={styles.projectRow}>
+            <div
+              style={styles.projectTitle}
+              onClick={() => router.push("/chat")}
+            >
+              📌 {p.title}
+            </div>
+
+            <div style={styles.projectMenu}>
+              <button
+                onClick={() => {
+                  const name = prompt("Novo nome do projeto:", p.title);
+                  if (!name) return;
+                  const updated = projects.map((x) =>
+                    x.id === p.id ? { ...x, title: name } : x
+                  );
+                  setProjects(updated);
+                  localStorage.setItem(
+                    "nicholens-projects",
+                    JSON.stringify(updated)
+                  );
+                }}
+              >
+                ✏️
+              </button>
+
+              <button
+                onClick={() => {
+                  if (!confirm("Excluir este projeto?")) return;
+                  const updated = projects.filter((x) => x.id !== p.id);
+                  setProjects(updated);
+                  localStorage.setItem(
+                    "nicholens-projects",
+                    JSON.stringify(updated)
+                  );
+                }}
+              >
+                🗑️
+              </button>
+            </div>
           </div>
         ))
       )}
@@ -109,79 +192,26 @@ const styles = {
   page: {
     height: "100%",
     padding: 20,
-    paddingBottom: 90,
-    display: "flex",
-    justifyContent: "center",
-    background:
-      "linear-gradient(180deg,#0f1225 0%,#151a3a 40%,#0b0f24 100%)",
+    background: "linear-gradient(180deg,#0f1225,#0b0f24)",
     color: "#fff",
-    fontFamily:
-      '"Plus Jakarta Sans", system-ui, -apple-system, Segoe UI, Roboto',
   },
-
   pageScroll: {
     height: "100%",
     padding: 20,
     paddingBottom: 90,
     overflowY: "auto",
-    background:
-      "linear-gradient(180deg,#0f1225 0%,#151a3a 40%,#0b0f24 100%)",
+    background: "linear-gradient(180deg,#0f1225,#0b0f24)",
     color: "#fff",
-    fontFamily:
-      '"Plus Jakarta Sans", system-ui, -apple-system, Segoe UI, Roboto',
   },
-
   center: {
+    display: "flex",
     flexDirection: "column",
     alignItems: "center",
     gap: 26,
   },
 
-  /* AUTH */
-  authBlock: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    gap: 8,
-  },
-  authText: {
-    fontSize: 12,
-    opacity: 0.85,
-  },
-  provider: {
-    display: "flex",
-    alignItems: "center",
-    gap: 10,
-  },
-  googleIcon: {
-    width: 18,
-    height: 18,
-  },
-  loginBtn: {
-    width: 220,
-    padding: "12px",
-    borderRadius: 14,
-    border: "1px solid #4ade80",
-    background: "linear-gradient(90deg,#4ade80,#22c55e)",
-    color: "#0b1220",
-    fontWeight: 700,
-    fontSize: 14,
-  },
-  registerBtn: {
-    width: 220,
-    padding: "12px",
-    borderRadius: 14,
-    border: "1px solid #4ade80",
-    background: "transparent",
-    color: "#fff",
-    fontWeight: 700,
-    fontSize: 14,
-  },
-
-  /* PERFIL */
   profileHeader: {
     display: "flex",
-    alignItems: "center",
     gap: 14,
     marginBottom: 20,
   },
@@ -196,13 +226,29 @@ const styles = {
     fontSize: 24,
     fontWeight: 900,
   },
+  avatarImg: {
+    width: 56,
+    height: 56,
+    borderRadius: "50%",
+    objectFit: "cover",
+  },
   name: {
     fontSize: 18,
     fontWeight: 800,
+    cursor: "pointer",
   },
   email: {
     fontSize: 13,
     opacity: 0.7,
+  },
+  linkBtn: {
+    marginTop: 4,
+    background: "none",
+    border: "none",
+    color: "#8b5cf6",
+    fontSize: 12,
+    cursor: "pointer",
+    padding: 0,
   },
 
   infoCard: {
@@ -224,12 +270,39 @@ const styles = {
     marginBottom: 10,
   },
 
-  menuItem: {
+  projectRow: {
     background: "#232a55",
     borderRadius: 14,
     padding: 14,
     marginBottom: 10,
-    fontSize: 14,
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  projectTitle: {
+    cursor: "pointer",
+  },
+  projectMenu: {
+    display: "flex",
+    gap: 8,
+  },
+
+  editInput: {
+    width: "100%",
+    padding: 6,
+    borderRadius: 8,
+    border: "none",
+    background: "#2a2f55",
+    color: "#fff",
+  },
+  editInputSmall: {
+    width: 140,
+    padding: 4,
+    borderRadius: 6,
+    border: "none",
+    background: "#2a2f55",
+    color: "#fff",
+    fontSize: 13,
   },
 
   empty: {
