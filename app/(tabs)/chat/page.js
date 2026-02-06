@@ -168,15 +168,45 @@ export default function ChatPage() {
         <span style={styles.tickets}>🎟️ {tickets}</span>
       </div>
 
-      {/* MENU */}
       {menuOpen && (
-        <div style={styles.menu} ref={menuRef}>
-          <button style={styles.menuItem} onClick={newChat}>
-            ➕ Novo chat
+  <div style={styles.menu} ref={menuRef}>
+    <button style={styles.menuItem} onClick={newChat}>
+      ➕ Novo chat
+    </button>
+
+    <div style={styles.menuTitle}>📁 Projetos salvos</div>
+
+    {projects.length === 0 && (
+      <div style={styles.menuEmpty}>Nenhum projeto ainda</div>
+    )}
+
+    {projects.map((p) => (
+      <div key={p.id} style={styles.projectItem}>
+        <button
+          style={styles.projectBtn}
+          onClick={() => loadProject(p)}
+        >
+          📌 {p.title}
+        </button>
+
+        <div style={styles.projectActions}>
+          <button
+            onClick={() => renameProject(p.id)}
+            style={styles.iconBtn}
+          >
+            ✏️
+          </button>
+          <button
+            onClick={() => deleteProject(p.id)}
+            style={styles.iconBtn}
+          >
+            🗑️
           </button>
         </div>
-      )}
-
+      </div>
+    ))}
+  </div>
+)}
       {/* CONTEÚDO */}
       <div style={styles.content}>
         {messages.length === 0 && (
