@@ -189,23 +189,23 @@ export default function ChatPage() {
             ➕ Novo chat
           </button>
 
-          <div style={styles.menuTitle}>📁 Projetos salvos</div>
+          <div style={styles.menuTitle}>📁 Chats salvos</div>
 
-          {projects.length === 0 && (
-            <div style={styles.menuEmpty}>Nenhum projeto ainda</div>
+          {chats.length === 0 && (
+            <div style={styles.menuEmpty}>Nenhum chat ainda</div>
           )}
 
-          {projects.map((p) => (
-            <div key={p.id} style={styles.projectItem}>
-              <button style={styles.projectBtn} onClick={() => loadProject(p)}>
+{chats.map((p) => (
+            <div key={p.id} style={styles.chatItem}>
+              <button style={styles.chatBtn} onClick={() => loadChatp)}>
                 📌 {p.title}
               </button>
 
-              <div style={styles.projectActions}>
-                <button onClick={() => renameProject(p.id)} style={styles.iconBtn}>
+              <div style={styles.chatActions}>
+                <button onClick={() => renameChat(p.id)} style={styles.iconBtn}>
                   ✏️
                 </button>
-                <button onClick={() => deleteProject(p.id)} style={styles.iconBtn}>
+                <button onClick={() => deleteChat(p.id)} style={styles.iconBtn}>
                   🗑️
                 </button>
               </div>
